@@ -18,7 +18,8 @@ struct Value {
 	};
 };
 
-struct Expression {
-	Expression* parent = nullptr;
-	virtual void Eval() = 0;
-};
+Value stack[stackSize];
+
+int main() {
+	return 0;
+}
