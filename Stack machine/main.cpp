@@ -1,85 +1,64 @@
 #include <cstdint>
 #include <stddef.h>
 #include <stdlib.h>
+#include <iostream>
 
-constexpr  size_t stackSize = 1024;
-
-enum struct Type {
-	i32, u32, bol, flt, dbl
+constexpr int32_t program[] {
+	0x00000001, 10,
+	0x00000009,
+	0x00000012,
+	0x0000000f, 2,
+	0x00000000,
 };
 
-struct Value {
-	Type type;
-	union {
-		int32_t i32;
-		uint32_t u32;
-		bool bol;
-		float flt;
-		double dbl;
-	};
-
-	Value(int32_t v)	: type(Type::i32), i32(v) {}
-	Value(uint32_t v)	: type(Type::u32), u32(v) {}
-	Value(bool v)		: type(Type::bol), bol(v) {}
-	Value(float v)		: type(Type::flt), flt(v) {}
-	Value(double v)		: type(Type::dbl), dbl(v) {}
-};
-
+constexpr size_t stackSize = 1024;
 size_t sp = 0;
 size_t ip = 0;
 
 class {
-	Value data[stackSize];
+	int32_t data[stackSize];
 public:
-	Value& operator[](size_t index) { return data[index]; }
-	void Push(const Value& v) { data[sp++] = v; }
-	Value Pop() { return data[--sp]; }
+	int32_t& operator[](size_t index) { return data[index]; }
+	void Push(const int32_t& v) { data[sp++] = v; }
+	int32_t Pop() { return data[--sp]; }
+	int32_t& Top() { return data[sp - 1]; }
 } stack;
 
 
 
 void hlt() { exit(0); }
+void ldc() { stack.Push(program[ip + 1]);	ip += 2; }
+void add() { stack.Push(stack.Pop() + stack.Pop());									ip++; }
+void sub() { stack.Push(stack.Pop() - stack.Pop());									ip++; }
+void mul() { stack.Push(stack.Pop() * stack.Pop());									ip++; }
+void div() { stack.Push(stack.Pop() / stack.Pop());									ip++; }
+void pop() { stack.Pop();															ip++; }
+void dup() { stack.Push(stack.Top());												ip++; }
+void swp() { ((stack[sp - 1] %= stack[sp - 2]) %= stack[sp - 1]) %= stack[sp - 2];	ip++; }
+void dsp() { std::cout << stack.Pop() << '\n';										ip++; }
+void jmp() { ip = program[ip + 1]; }
+void cal() {
+	stack.Push(ip);
+	ip = program[ip + 1];
+}
+void ret() { ip = stack.Pop() + 1; }
+void jez() { if(stack.Pop() == 0)	ip = program[ip + 1];	else	ip += 2; }
+void jnz() { if(stack.Pop() != 0)	ip = program[ip + 1];	else	ip += 2; }
+void jgz() { if(stack.Pop() > 0)	ip = program[ip + 1];	else	ip += 2; }
+void jlz() { if(stack.Pop() < 0)	ip = program[ip + 1];	else	ip += 2; }
+void inc() { stack.Top()++;															ip++; }
+void dec() { stack.Top()--;															ip++; }
+void shl() { stack.Top() <<= 1;														ip++; }
+void shr() { stack.Top() >>= 1;														ip++; }
 
-#define LD_CONST(NAME, TYPE) void NAME##_ld_const() { stack.Push(Value((TYPE)program[++sp]));	sp += sizeof(TYPE); }
-LD_CONST(i32, int32_t)
-LD_CONST(u32, uint32_t)
-LD_CONST(bol, bool)
-LD_CONST(flt, float)
-LD_CONST(dbl, double)
-#undef LD_CONST
-
-#define MKBOP_1(TYPENAME, TYPE, OPNAME, OP) void TYPENAME##_##OPNAME() { stack.Push(stack.Pop().TYPENAME OP stack.Pop().TYPENAME); }
-#define MKBOP(OPNAME, OP) \
-MKBOP_1(i32, int32_t, OPNAME, OP) \
-MKBOP_1(u32, uint32_t, OPNAME, OP) \
-MKBOP_1(bol, bool, OPNAME, OP) \
-MKBOP_1(flt, float, OPNAME, OP) \
-MKBOP_1(dbl, double, OPNAME, OP)
-
-MKBOP(add, +)
-MKBOP(sub, -)
-MKBOP(mul, *)
-MKBOP(div, /)
-#undef MKBOP_1
-#undef MKBOP
-
-
-
-void(*functions[])() {
-	hlt, 
-	i32_ld_const, u32_ld_const, bol_ld_const, flt_ld_const, dbl_ld_const,
-	i32_add, u32_add, bol_add, flt_add, dbl_add,
-	i32_sub, u32_sub, bol_sub, flt_sub, dbl_sub,
-	i32_mul, u32_mul, bol_mul, flt_mul, dbl_mul,
-	i32_div, u32_div, bol_div, flt_div, dbl_div,
+constexpr void (*functions[])() {
+	hlt, ldc, add, sub, mul, div, pop, dup, swp, dsp, jmp, cal, ret, jez, jnz, jgz, jlz, inc, dec, shl, shr
 };
 
-constexpr uint32_t program[] {
-	0x0
-};
+
 
 int main() {
-	while(ip < sizeof(program)) {
+	while(ip < sizeof(program) / sizeof(*program)) {
 		functions[program[ip]]();
 	}
 	return 0;
