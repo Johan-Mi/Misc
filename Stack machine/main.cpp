@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <stddef.h>
+#include <stdlib.h>
 
 constexpr  size_t stackSize = 1024;
 
@@ -18,7 +19,24 @@ struct Value {
 	};
 };
 
-Value stack[stackSize];
+class {
+	Value data[stackSize];
+public:
+	size_t sp = 0;
+	Value& operator[](size_t index) { return data[index]; }
+	void Push(const Value& v) { data[sp++] = v; }
+	Value Pop() { return data[--sp]; }
+} stack;
+
+
+
+void hlt() { exit(0); }
+
+
+
+void(*functions[])() {
+	hlt
+};
 
 int main() {
 	return 0;
