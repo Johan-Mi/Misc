@@ -5,9 +5,11 @@
 
 constexpr int32_t program[] {
 	0x00000001, 10,
+	0x00000007,
 	0x00000009,
 	0x00000012,
-	0x0000000f, 2,
+	0x00000007,
+	0x0000000e, 2,
 	0x00000000,
 };
 
@@ -34,7 +36,7 @@ void mul() { stack.Push(stack.Pop() * stack.Pop());									ip++; }
 void div() { stack.Push(stack.Pop() / stack.Pop());									ip++; }
 void pop() { stack.Pop();															ip++; }
 void dup() { stack.Push(stack.Top());												ip++; }
-void swp() { ((stack[sp - 1] %= stack[sp - 2]) %= stack[sp - 1]) %= stack[sp - 2];	ip++; }
+void swp() { stack[sp - 1] ^= stack[sp - 2] ^= stack[sp - 1] ^= stack[sp - 2];		ip++; }
 void dsp() { std::cout << stack.Pop() << '\n';										ip++; }
 void jmp() { ip = program[ip + 1]; }
 void cal() {
