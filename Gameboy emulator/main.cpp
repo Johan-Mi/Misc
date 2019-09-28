@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <cassert>
 typedef uint8_t u8;
 typedef uint16_t u16;
 
@@ -7,15 +8,10 @@ struct Regs {
 	Flags f;
 	u8 h, l; 
 
-	u16 get_af() { return (u16)a << 8 | f; }
 	u16 get_bc() { return (u16)b << 8 | c; }
 	u16 get_de() { return (u16)d << 8 | e; }
 	u16 get_hl() { return (u16)h << 8 | l; }
 
-	u16 set_af(u16 value) {
-		a = value >> 8;
-		f = value;
-	}
 	u16 set_bc(u16 value) {
 		b = value >> 8;
 		c = value;
@@ -50,7 +46,7 @@ struct Flags {
 };
 
 enum ArithmeticTarget {
-	A, B, C, D, E, H, L
+	A, B, C, D, E, H, L, BC, DE, HL
 };
 
 enum Opcode {
@@ -67,7 +63,7 @@ struct OpTarget : Op {
 
 struct CPU {
 	Regs regs;
-	void Execute(const Op& instruction) {
+	void execute(const Op& instruction) {
 		switch(instruction.opcode) {
 		case ADD:
 			switch(((const OpTarget&)instruction).target) {
@@ -78,18 +74,16 @@ struct CPU {
 			case E:	regs.a = add(regs.e);	break;
 			case H:	regs.a = add(regs.h);	break;
 			case L:	regs.a = add(regs.l);	break;
+			default:	assert(false && "Invalid target for ADD");
 			}
 			break;
 		
 		case ADDHL:
 			switch(((const OpTarget&)instruction).target) {
-			case A:	regs.l = addhl(regs.a);	break;
-			case B:	regs.l = addhl(regs.b);	break;
-			case C:	regs.l = addhl(regs.c);	break;
-			case D:	regs.l = addhl(regs.d);	break;
-			case E:	regs.l = addhl(regs.e);	break;
-			case H:	regs.l = addhl(regs.h);	break;
-			case L:	regs.l = addhl(regs.l);	break;
+			case BC:	addhl(regs.get_bc());	break;
+			case DE:	addhl(regs.get_de());	break;
+			case HL:	addhl(regs.get_hl());	break;
+			default:	assert(false && "Invalid target for ADDHL");
 			}
 			break;
 		}
@@ -104,12 +98,13 @@ struct CPU {
 		return new_value;
 	}
 
-	u8 add(u8 value) {
-		u8 new_value = regs.a + value;
+	void addhl(u16 value) {
+		u16 new_value = ((u16)regs.h << 8 | regs.l) + value;
 		regs.f.zero = new_value == 0;
 		regs.f.subtract = false;
-		regs.f.carry = ((u16)regs.a + (u16)value) & 0x100;
-		regs.f.half_carry = (regs.a & 0xf) + (value & 0xf) > 0xf;
-		return new_value;
+		regs.f.carry = (((uint32_t)regs.h << 8 | regs.l) + value) & 0x10000;
+		regs.f.half_carry = ((regs.h & 0xfff) << 8 | regs.l) + value & 0xfff > 0xfff;
+		regs.h = new_value >> 8;
+		regs.l = new_value;
 	}
 };
