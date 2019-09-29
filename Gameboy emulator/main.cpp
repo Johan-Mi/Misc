@@ -350,7 +350,26 @@ struct CPU {
 			/* RST 38H     */ case 0xff:	push(pc);														pc=56;	cycle(1);	break;
 		
 						
-			/* Prefix      */ case 0xcb: /* TODO: Prefix instructions */	break;
+			// Prefix instructions
+			case 0xcb:
+				instruction = bus.read_byte(++pc);
+				u8* const parameters[]{&regs.b, &regs.c, &regs.d, &regs.e, &regs.h, &regs.l, &bus.read_byte(regs.hl)};
+				u8& parameter = *(parameters[instruction & 0x7]);
+				switch(instruction &= 0xf8) {
+				case 0x00:	rlc(parameter);		break;
+				case 0x08:	rrc(parameter);		break;
+				case 0x10:	rl(parameter);		break;
+				case 0x18:	rr(parameter);		break;
+				case 0x20:	sla(parameter);		break;
+				case 0x28:	sra(parameter);		break;
+				case 0x30:	swap(parameter);	break;
+				case 0x38:	srl(parameter);		break;
+				case 0x40 ... 0x78:	bit((instruction - 0x40) >> 3, parameter);	break;
+				case 0x80 ... 0xb8:	res((instruction - 0x80) >> 3, parameter);	break;
+				case 0xc0 ... 0xf8:	set((instruction - 0xc0) >> 3, parameter);	break;
+				}
+				pc++;
+			break;
 		}
 	}
 
@@ -450,7 +469,7 @@ struct CPU {
 	void rrca() {
 		regs.f.subtract = false;
 		regs.f.half_carry = false;
-		regs.f.carry = regs.a & 0x1;
+		regs.f.carry = regs.a;
 		regs.a >>= 1;
 		regs.f.zero = regs.a == 0;
 	}
@@ -507,7 +526,7 @@ struct CPU {
 
 		regs.f.zero = regs.a == 0;
 		regs.f.half_carry = false;
-		if((a & 0x100) == 0x100)
+		if(a & 0x100)
 			regs.f.carry = true;
 	}
 
@@ -530,15 +549,13 @@ struct CPU {
 	}
 
 	void inc_byte(u8& value) {
-		value++;
-		regs.f.zero = !value;
+		regs.f.zero = !++value;
 		regs.f.subtract = false;
 		regs.f.half_carry = !(value & 0xf);
 	}
 	
 	void dec_byte(u8& value) {
-		value--;
-		regs.f.zero = !value;
+		regs.f.zero = !--value;
 		regs.f.subtract = true;
 		regs.f.half_carry = !~(value & 0xf);
 	}
@@ -547,6 +564,82 @@ struct CPU {
 		push(pc + 3);
 		pc = bus.read_word(pc + 1);
 	}
+
+	void rlc(u8& value) {
+		regs.f.carry = value >> 7;
+		value = value << 1 | regs.f.carry;
+		regs.f.subtract = false;
+		regs.f.half_carry = false;
+		regs.f.zero = !value;
+	}
+
+	void rrc(u8& value) {
+		regs.f.carry = value;
+		value = value >> 1 | regs.f.carry << 7;
+		regs.f.subtract = false;
+		regs.f.half_carry = false;
+		regs.f.zero = !value;
+	}
+	
+	void rl(u8& value) {
+		bool temp = regs.f.carry;
+		regs.f.carry = value >> 7;
+		value = value << 1 | temp;
+		regs.f.subtract = false;
+		regs.f.half_carry = false;
+		regs.f.zero = !value;
+	}
+	
+	void rr(u8& value) {
+		bool temp = regs.f.carry;
+		regs.f.carry = value;
+		value = value >> 1 | temp << 7;
+		regs.f.subtract = false;
+		regs.f.half_carry = false;
+		regs.f.zero = !value;
+	}
+	
+	void sla(u8& value) {
+		regs.f.carry = value & 0x80;
+		value <<= 1;
+		regs.f.subtract = false;
+		regs.f.half_carry = false;
+		regs.f.zero = !value;
+	}
+	
+	void sra(u8& value) {
+		regs.f.carry = value;
+		value = (value & 0x80) | value >> 1;
+		regs.f.subtract = false;
+		regs.f.half_carry = false;
+		regs.f.zero = !value;
+	}
+	
+	void swap(u8& value) {
+		value = ((value & 0xf0) >> 4) | ((value & 0x0f) << 4);
+		regs.f.subtract = false;
+		regs.f.half_carry = false;
+		regs.f.carry = false;
+		regs.f.zero = !value;
+	}
+	
+	void srl(u8& value) {
+		regs.f.carry = value;
+		value >>= 1;
+		regs.f.subtract = false;
+		regs.f.half_carry = false;
+		regs.f.zero = !value;
+	}
+	
+	void bit(u8 b, u8 value) {
+		regs.f.zero = !(value >> b & 0x1);
+		regs.f.subtract = false;
+		regs.f.half_carry = true;
+	}
+	
+	void res(u8 b, u8& value) { value &= ~((u8)0x01 << b); }
+	
+	void set(u8 b, u8& value) { value |= 1 << b; }
 };
 
 
