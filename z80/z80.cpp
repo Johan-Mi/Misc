@@ -6,17 +6,20 @@ using u8 = uint8_t;
 using u16 = uint16_t;
 
 class Z80 {
+	virtual u8 readByte(u16 address) = 0;
+	virtual void writeByte(u16 address) = 0;
+	
 	struct Flags {
 		union {
 			struct {
-				bool S    : 1;
-				bool Z    : 1;
-				bool bit5 : 1;
-				bool H    : 1;
-				bool bit3 : 1;
-				bool PV   : 1;
-				bool N    : 1;
-				bool C    : 1;
+				bool S  : 1;
+				bool Z  : 1;
+				bool Y  : 1;
+				bool H  : 1;
+				bool X  : 1;
+				bool P  : 1;
+				bool N  : 1;
+				bool C  : 1;
 			}
 			u8 raw;
 		}
@@ -46,6 +49,31 @@ class Z80 {
 		}
 		u16 HL;
 	}
+	union {
+		struct {
+			Flags Fp;
+			u8 Ap;
+		}
+		u16 AFp;
+	}
+	union {
+		struct {
+			u8 Cp, Bp;
+		}
+		u16 BCp;
+	}
+	union {
+		struct {
+			u8 Ep, Dp;
+		}
+		u16 DEp;
+	}
+	union {
+		struct {
+			u8 Lp, Hp;
+		}
+		u16 HLp;
+	}
 
 	u16 PC;
 	u16 SP;
@@ -56,30 +84,22 @@ class Z80 {
 
 	bool enableInterrupts;
 
-	u8 cycles = 0;
-
-	virtual u8 readByte(u16 address) = 0;
-	virtual void writeByte(u16 address) = 0;
-
 	void reset() {
 		enableInterrupts = false;
 		PC = 0;
 		I = 0;
 		R = 0;
+		AF = 0xffff;
+		SP = 0xffff;
 	}
 
 	void step()	{
-		if(!cycles) {
-			u8 currentInstruction = readByte(pc++);
-			
-			switch(currentInstruction) {
-			/*NOP*/ case 0:	break;
-			
-			default:
-				assert(!"Unknown opcode in step()");
-			}
-			
-			cycles--;
+		u8 currentInstruction = readByte(pc++);
+		
+		switch(currentInstruction) {
+		
+		default:
+			assert(!"Unknown opcode in step()");
 		}
 	}
 }
