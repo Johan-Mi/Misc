@@ -111,9 +111,11 @@ class Z80 {
 		u8 currentInstruction = readByte(PC++);
 		
 		switch(currentInstruction) {
-		case 0x00: //
+		case 0x00: // nop
 			break;
-		case 0x01: //
+		case 0x01: // ld BC,**
+			BC = readWord(PC);
+			PC += 2;
 			break;
 		case 0x02: //
 			break;
@@ -145,7 +147,9 @@ class Z80 {
 			break;
 		case 0x10: //
 			break;
-		case 0x11: //
+		case 0x11: // ld DE,**
+			DE = readWord(PC);
+			PC += 2;
 			break;
 		case 0x12: //
 			break;
@@ -177,7 +181,9 @@ class Z80 {
 			break;
 		case 0x20: //
 			break;
-		case 0x21: //
+		case 0x21: // ld HL,**
+			HL = readWord(PC);
+			PC += 2;
 			break;
 		case 0x22: //
 			break;
@@ -209,7 +215,9 @@ class Z80 {
 			break;
 		case 0x30: //
 			break;
-		case 0x31: //
+		case 0x31: // ld SP,**
+			SP = readWord(PC);
+			PC += 2;
 			break;
 		case 0x32: //
 			break;
@@ -240,166 +248,30 @@ class Z80 {
 		case 0x3f: //
 			break;
 
-		case 0x40 ... 0x7f:
+		case 0x40 ... 0x7f: // mov REG,REG
 			u8 src;
-			switch(currentInstruction & 0x07) {
-			case 0x0:	src = B;	break;
-			case 0x1:	src = C;	break;	
-			case 0x2:	src = D;	break;
-			case 0x3:	src = E;	break;
-			case 0x4:	src = H;	break;
-			case 0x5:	src = L;	break;
+			switch(currentInstruction & 0b00000111) {
+			case 0x0:	src = B;			break;
+			case 0x1:	src = C;			break;	
+			case 0x2:	src = D;			break;
+			case 0x3:	src = E;			break;
+			case 0x4:	src = H;			break;
+			case 0x5:	src = L;			break;
 			case 0x6:	src = readByte(HL);	break;
-			case 0x7:	src = A;	break;
+			case 0x7:	src = A;			break;
 			}
-			switch(currentInstruction & 0xF8) {
-			case 0x40:	B = src;	break;
-			case 0x48:	C = src;	break;
-			case 0x50:	D = src;	break;
-			case 0x58:	E = src;	break;
-			case 0x60:	H = src;	break;
-			case 0x68:	L = src;	break;
+			switch(currentInstruction & 0b11111000) {
+			case 0x40:	B = src;			break;
+			case 0x48:	C = src;			break;
+			case 0x50:	D = src;			break;
+			case 0x58:	E = src;			break;
+			case 0x60:	H = src;			break;
+			case 0x68:	L = src;			break;
 			case 0x70:	writeByte(HL, src);	break;
-			case 0x78:	A = src;	break;
+			case 0x78:	A = src;			break;
 			}
 			break;
 
-		case 0x40: //LD b,b
-			ldByte(B, B);
-			break;
-		case 0x41: //LD b,c
-			ldByte(B, C);
-			break;
-		case 0x42: //LD b,d
-			ldByte(B, D);
-			break;
-		case 0x43: //LD b,e
-			ldByte(B, E);
-			break;
-		case 0x44: //LD b,h
-			ldByte(B, H);
-			break;
-		case 0x45: //LD b,l
-			ldByte(B, L);
-			break;
-		case 0x46: //LD b,(hl)
-			ldByte(B, readByte(HL));
-			break;
-		case 0x47: //LD b,a
-			ldByte(B, A);
-			break;
-		case 0x48: //
-			break;
-		case 0x49: //
-			break;
-		case 0x4a: //
-			break;
-		case 0x4b: //
-			break;
-		case 0x4c: //
-			break;
-		case 0x4d: //
-			break;
-		case 0x4e: //
-			break;
-		case 0x4f: //
-			break;
-		case 0x50: //
-			break;
-		case 0x51: //
-			break;
-		case 0x52: //
-			break;
-		case 0x53: //
-			break;
-		case 0x54: //
-			break;
-		case 0x55: //
-			break;
-		case 0x56: //
-			break;
-		case 0x57: //
-			break;
-		case 0x58: //
-			break;
-		case 0x59: //
-			break;
-		case 0x5a: //
-			break;
-		case 0x5b: //
-			break;
-		case 0x5c: //
-			break;
-		case 0x5d: //
-			break;
-		case 0x5e: //
-			break;
-		case 0x5f: //
-			break;
-		case 0x60: //
-			break;
-		case 0x61: //
-			break;
-		case 0x62: //
-			break;
-		case 0x63: //
-			break;
-		case 0x64: //
-			break;
-		case 0x65: //
-			break;
-		case 0x66: //
-			break;
-		case 0x67: //
-			break;
-		case 0x68: //
-			break;
-		case 0x69: //
-			break;
-		case 0x6a: //
-			break;
-		case 0x6b: //
-			break;
-		case 0x6c: //
-			break;
-		case 0x6d: //
-			break;
-		case 0x6e: //
-			break;
-		case 0x6f: //
-			break;
-		case 0x70: //
-			break;
-		case 0x71: //
-			break;
-		case 0x72: //
-			break;
-		case 0x73: //
-			break;
-		case 0x74: //
-			break;
-		case 0x75: //
-			break;
-		case 0x76: //
-			break;
-		case 0x77: //
-			break;
-		case 0x78: //
-			break;
-		case 0x79: //
-			break;
-		case 0x7a: //
-			break;
-		case 0x7b: //
-			break;
-		case 0x7c: //
-			break;
-		case 0x7d: //
-			break;
-		case 0x7e: //
-			break;
-		case 0x7f: //
-			break;
 		case 0x80: //
 			break;
 		case 0x81: //
@@ -542,7 +414,8 @@ class Z80 {
 			break;
 		case 0xc6: //
 			break;
-		case 0xc7: //
+		case 0xc7: // rst 00h
+			rst(0x00);
 			break;
 		case 0xc8: //
 			break;
@@ -557,7 +430,8 @@ class Z80 {
 			break;
 		case 0xce: //
 			break;
-		case 0xcf: //
+		case 0xcf: // rst 08h
+			rst(0x08);
 			break;
 		case 0xd0: //
 			break;
@@ -573,7 +447,8 @@ class Z80 {
 			break;
 		case 0xd6: //
 			break;
-		case 0xd7: //
+		case 0xd7: // rst 10h
+			rst(0x10);
 			break;
 		case 0xd8: //
 			break;
@@ -588,7 +463,8 @@ class Z80 {
 		//DD prefix
 		case 0xde: //
 			break;
-		case 0xdf: //
+		case 0xdf: // rst 18h
+			rst(0x18);
 			break;
 		case 0xe0: //
 			break;
@@ -604,7 +480,8 @@ class Z80 {
 			break;
 		case 0xe6: //
 			break;
-		case 0xe7: //
+		case 0xe7: // rst 20h
+			rst(0x20);
 			break;
 		case 0xe8: //
 			break;
@@ -619,7 +496,8 @@ class Z80 {
 		//ED prefix
 		case 0xee: //
 			break;
-		case 0xef: //
+		case 0xef: // rst 28h
+			rst(0x28);
 			break;
 		case 0xf0: //
 			break;
@@ -635,7 +513,8 @@ class Z80 {
 			break;
 		case 0xf6: //
 			break;
-		case 0xf7: //
+		case 0xf7: // rst 30h
+			rst(0x30);
 			break;
 		case 0xf8: //
 			break;
@@ -650,9 +529,10 @@ class Z80 {
 		//FD prefix
 		case 0xfe: //
 			break;
-		case 0xff: //
+		case 0xff: // rst 38h
+			rst(0x38);
 			break;
-			
+			;
 
 		case 0xed:
 			//ED instructions
@@ -686,7 +566,13 @@ class Z80 {
 	}
 
 	private:
-	void ldByte(u8& dest, u8 src) {
-		dest = src;
+	void push(u8 value) {
+		writeByte(--PC, value);
 	}
+
+	void rst(u16 value) {
+		push(PC);
+		PC = value;
+	}
+
 };
