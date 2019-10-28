@@ -2,6 +2,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <string_view>
+#include <iomanip>
 
 void fail();
 
@@ -15,6 +16,9 @@ int main() {
 		if(c >= 'A' && c <= 'Z')
 			c += 32;
 	}
+
+	std::string formattedName = input;
+	formattedName[0] -= 32;
 
 	enum class Prefix {
 		Met = 1, Et, Prop, But, Pent, Hex, Hept, Okt, Non, Dek
@@ -79,32 +83,47 @@ int main() {
 
 	unsigned int carbonCount = static_cast<unsigned int>(prefix);
 	unsigned int hydrogenCount;
+	unsigned int lineLength;
 
 	switch(suffix) {
 	case Suffix::Alkan:
 		hydrogenCount = 2 * carbonCount + 2;
+		lineLength = 2 * carbonCount + 3;
 		break;
 	case Suffix::Alken:
 		hydrogenCount = 2 * carbonCount;
+		lineLength = 2 * carbonCount + 1;
 		break;
 	case Suffix::Alkyn:
 		hydrogenCount = 2 * carbonCount - 2;
+		lineLength = 2 * carbonCount + 3;
 		break;
 	default:
 		std::cout << "Alkoholer och syror är inte implementerade än\n\n";
 		exit(0);
 	}
-
-	std::cout << 'C';
+	
+	std::string formula = "C";
 	if(carbonCount != 1)
-		std::cout << std::to_string(carbonCount);
-	std::cout << 'H' << std::to_string(hydrogenCount) << "\n\n┌";
+		formula += std::to_string(carbonCount);
+	formula += 'H';
+	formula	+= std::to_string(hydrogenCount);
+
+	std::cout << "┌";
+	for(unsigned int i = 0; i < lineLength; i++)
+		std::cout << "─";
+	std::cout << "┐\n│" << std::setw(lineLength) << std::left << formattedName << "│\n├";
+	for(unsigned int i = 0; i < lineLength; i++)
+		std::cout << "─";
+	std::cout << "┤\n│" << std::setw(lineLength) << formula << "│\n╞";
+	for(unsigned int i = 0; i < lineLength; i++)
+		std::cout << "═";
+	std::cout << "╡\n";
+
 
 	switch(suffix) {
 	case Suffix::Alkan:
-		for(unsigned int i = 0; i < 2 * carbonCount + 3; i++)
-			std::cout << "─";
-		std::cout << "┐\n│  ";
+		std::cout << "│  ";
 		for(unsigned int i = 0; i < carbonCount; i++)
 			std::cout << "H ";
 		std::cout << " │\n│  ";
@@ -126,9 +145,7 @@ int main() {
 		break;
 	
 	case Suffix::Alken:
-		for(unsigned int i = 0; i < 2 * carbonCount + 1; i++)
-			std::cout << "─";
-		std::cout << "┐\n│";
+		std::cout << "│";
 		for(unsigned int i = 0; i < carbonCount; i++)
 			std::cout << "H ";
 		std::cout << " │\n│";
@@ -150,9 +167,6 @@ int main() {
 		break;
 
 	case Suffix::Alkyn:
-		for(unsigned int i = 0; i < 2 * carbonCount + 3; i++)
-			std::cout << "─";
-		std::cout << "┐\n";
 		if(prefix != Prefix::Et) {
 			std::cout << "│      ";
 			for(unsigned int i = 0; i < carbonCount - 2; i++)
