@@ -3,10 +3,7 @@
 #include <unordered_map>
 #include <string_view>
 
-void fail() {
-	std::cout << "Ogiltigt ämne\n\n";
-	exit(0);
-}
+void fail();
 
 int main() {
 	std::cout << "Skriv ett organiskt ämne: ";
@@ -80,7 +77,7 @@ int main() {
 	if(prefix == Prefix::Met && (suffix == Suffix::Alken || suffix == Suffix::Alkyn))
 		fail();
 
-	unsigned int carbonCount = (unsigned int)prefix;
+	unsigned int carbonCount = static_cast<unsigned int>(prefix);
 	unsigned int hydrogenCount;
 
 	switch(suffix) {
@@ -192,4 +189,9 @@ int main() {
 	std::cout << "\n\n";
 
 	return 0;
+}
+
+void fail() {
+	std::cout << "Ogiltigt ämne\n\n";
+	exit(0);
 }
