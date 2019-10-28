@@ -24,7 +24,7 @@ int main() {
 	} prefix;
 	
 	if(input == "kalkon") {
-		std::cout << "Gobbel gobbel\n\n                    .--.\n    {\\             / q {\\\n    { `\\           \\ (-(~`\n   { '.{`\\          \\ \\ )\n   {'-{ ' \\  .-\"\"'-. \\ \\\n   {._{'.' \\/       '.) \\\n   {_.{.   {`            |\n   {._{ ' {   ;'-=-.     |\n    {-.{.' {  ';-=-.`    /\n     {._.{.;    '-=-   .'\n      {_.-' `'.__  _,-'\n               |||`\n              .='==,\n\n";
+		std::cout << "Gobbel gobbel\n\n                    .--.\n    {\\             / q {\\\n    { `\\           \\ (-(~`\n   { '.{`\\          \\ \\ )\n   {'-{ ' \\  .-\"\"'-. \\ \\\n   {._{'.' \\/       '.) \\\n   {_.{.   {`            │\n   {._{ ' {   ;'-=-.     │\n    {-.{.' {  ';-=-.`    /\n     {._.{.;    '-=-   .'\n      {_.-' `'.__  _,-'\n               │││`\n              .='==,\n\n";
 		exit(0);
 	} else if(input.rfind("met", 0) == 0) {
 		prefix = Prefix::Met;
@@ -101,67 +101,88 @@ int main() {
 	std::cout << 'C';
 	if(carbonCount != 1)
 		std::cout << std::to_string(carbonCount);
-	std::cout << 'H' << std::to_string(hydrogenCount) << "\n\n";
+	std::cout << 'H' << std::to_string(hydrogenCount) << "\n\n┌";
 
 	switch(suffix) {
 	case Suffix::Alkan:
-		std::cout << "  ";
+		for(unsigned int i = 0; i < 2 * carbonCount + 3; i++)
+			std::cout << "─";
+		std::cout << "┐\n│  ";
 		for(unsigned int i = 0; i < carbonCount; i++)
 			std::cout << "H ";
-		std::cout << "\n  ";
+		std::cout << " │\n│  ";
 		for(unsigned int i = 0; i < carbonCount; i++)
-			std::cout << "| ";
-		std::cout << "\nH-";
+			std::cout << "│ ";
+		std::cout << " │\n│H─";
 		for(unsigned int i = 0; i < carbonCount; i++)
-			std::cout << "C-";
-		std::cout << "H\n  ";
+			std::cout << "C─";
+		std::cout << "H│\n│  ";
 		for(unsigned int i = 0; i < carbonCount; i++)
-			std::cout << "| ";
-		std::cout << "\n  ";
+			std::cout << "│ ";
+		std::cout << " │\n│  ";
 		for(unsigned int i = 0; i < carbonCount; i++)
 			std::cout << "H ";
+		std::cout << " │\n└";
+		for(unsigned int i = 0; i < 2 * carbonCount + 3; i++)
+			std::cout << "─";
+		std::cout << "┘";
 		break;
 	
 	case Suffix::Alken:
+		for(unsigned int i = 0; i < 2 * carbonCount + 1; i++)
+			std::cout << "─";
+		std::cout << "┐\n│";
 		for(unsigned int i = 0; i < carbonCount; i++)
 			std::cout << "H ";
-		std::cout << '\n';
+		std::cout << " │\n│";
 		for(unsigned int i = 0; i < carbonCount; i++)
-			std::cout << "| ";
-		std::cout << "\nC="; 
+			std::cout << "│ ";
+		std::cout << " │\n│C═";
 		for(unsigned int i = 0; i < carbonCount - 1; i++)
-			std::cout << "C-";
-		std::cout << "H\n|   ";
+			std::cout << "C─";
+		std::cout << "H│\n││   ";
 		for(unsigned int i = 0; i < carbonCount - 2; i++)
-			std::cout << "| ";
-		std::cout << "\nH   ";;
+			std::cout << "│ ";
+		std::cout << " │\n│H   ";;
 		for(unsigned int i = 0; i < carbonCount - 2; i++)
 			std::cout << "H ";
+		std::cout << " │\n└";
+		for(unsigned int i = 0; i < 2 * carbonCount + 1; i++)
+			std::cout << "─";
+		std::cout << "┘";
 		break;
 
 	case Suffix::Alkyn:
+		for(unsigned int i = 0; i < 2 * carbonCount + 3; i++)
+			std::cout << "─";
+		std::cout << "┐\n";
 		if(prefix != Prefix::Et) {
-			std::cout << "      ";
+			std::cout << "│      ";
 			for(unsigned int i = 0; i < carbonCount - 2; i++)
 				std::cout << "H ";
-			std::cout << "\n      ";
+			std::cout << " │\n│      ";
 			for(unsigned int i = 0; i < carbonCount - 2; i++)
-				std::cout << "| ";
-			std::cout << '\n';
+				std::cout << "│ ";
+			std::cout << " │\n";
 		}
-		std::cout << "H-C≡";
+		std::cout << "│H─C≡";
 		for(unsigned int i = 0; i < carbonCount - 1; i++) {
-			std::cout << "C-";
+			std::cout << "C─";
 		}
-		std::cout << 'H';
+		std::cout << "H│\n";
 		if(prefix != Prefix::Et) {
-			std::cout << "\n      ";
+			std::cout << "│      ";
 			for(unsigned int i = 0; i < carbonCount - 2; i++)
-				std::cout << "| ";
-			std::cout << "\n      ";
+				std::cout << "│ ";
+			std::cout << " │\n│      ";
 			for(unsigned int i = 0; i < carbonCount - 2; i++)
 				std::cout << "H ";
+			std::cout << " │\n";
 		}
+		std::cout << "└";
+		for(unsigned int i = 0; i < 2 * carbonCount + 3; i++)
+			std::cout << "─";
+		std::cout << "┘";
 		break;
 
 	default:
