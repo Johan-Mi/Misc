@@ -4,7 +4,10 @@
 #include <string_view>
 #include <iomanip>
 
-void fail();
+[[noreturn]]void fail() {
+	std::cout << "Ogiltigt ämne\n\n";
+	exit(0);
+}
 
 int main() {
 	std::cout << "Skriv ett organiskt ämne: ";
@@ -24,10 +27,7 @@ int main() {
 		Met = 1, Et, Prop, But, Pent, Hex, Hept, Okt, Non, Dek
 	} prefix;
 	
-	if(input == "kalkon") {
-		std::cout << "Gobbel gobbel\n\n                    .--.\n    {\\             / q {\\\n    { `\\           \\ (-(~`\n   { '.{`\\          \\ \\ )\n   {'-{ ' \\  .-\"\"'-. \\ \\\n   {._{'.' \\/       '.) \\\n   {_.{.   {`            │\n   {._{ ' {   ;'-=-.     │\n    {-.{.' {  ';-=-.`    /\n     {._.{.;    '-=-   .'\n      {_.-' `'.__  _,-'\n               │││`\n              .='==,\n\n";
-		exit(0);
-	} else if(input.rfind("met", 0) == 0) {
+	if(input.rfind("met", 0) == 0) {
 		prefix = Prefix::Met;
 		input = std::string(input.c_str() + 3);
 	} else if(input.rfind("et", 0) == 0) {
@@ -139,7 +139,7 @@ int main() {
 		for(unsigned int i = 0; i < carbonCount; i++)
 			std::cout << "H ";
 		std::cout << " │\n└";
-		for(unsigned int i = 0; i < 2 * carbonCount + 3; i++)
+		for(unsigned int i = 0; i < lineLength; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
@@ -161,7 +161,7 @@ int main() {
 		for(unsigned int i = 0; i < carbonCount - 2; i++)
 			std::cout << "H ";
 		std::cout << " │\n└";
-		for(unsigned int i = 0; i < 2 * carbonCount + 1; i++)
+		for(unsigned int i = 0; i < lineLength; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
@@ -191,7 +191,7 @@ int main() {
 			std::cout << " │\n";
 		}
 		std::cout << "└";
-		for(unsigned int i = 0; i < 2 * carbonCount + 3; i++)
+		for(unsigned int i = 0; i < lineLength; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
@@ -203,9 +203,4 @@ int main() {
 	std::cout << "\n\n";
 
 	return 0;
-}
-
-void fail() {
-	std::cout << "Ogiltigt ämne\n\n";
-	exit(0);
 }
