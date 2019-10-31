@@ -59,10 +59,10 @@ int main() {
 		inputView.remove_prefix(3);
 	} else {
 		fail();
-	}	
+	}
 
 	enum class Suffix {
-		Alkan, Alken, Alkyn, Alkohol, Syra
+		Alkan, Alken, Alkyn, Alkohol, Syra, Aldehyd
 	} suffix;
 
 	const std::unordered_map<std::string_view, const Suffix> suffixMap {
@@ -70,7 +70,8 @@ int main() {
 		{"en", Suffix::Alken},
 		{"yn", Suffix::Alkyn},
 		{"anol", Suffix::Alkohol},
-		{"ansyra", Suffix::Syra}
+		{"ansyra", Suffix::Syra},
+		{"anal", Suffix::Aldehyd}
 	};
 
 	if(suffixMap.find(inputView) == suffixMap.end())
@@ -81,10 +82,10 @@ int main() {
 	if(prefix == Prefix::Met && (suffix == Suffix::Alken || suffix == Suffix::Alkyn))
 		fail();
 
-	unsigned int carbonCount = static_cast<unsigned int>(prefix);
-	unsigned int hydrogenCount;
-	unsigned int oxygenCount = 0;
-	unsigned int lineLength;
+	int carbonCount = static_cast<int>(prefix);
+	int hydrogenCount;
+	int oxygenCount = 0;
+	int lineLength;
 
 	switch(suffix) {
 	case Suffix::Alkan:
@@ -108,7 +109,12 @@ int main() {
 		hydrogenCount = 2 * carbonCount;
 		oxygenCount = 2;
 		lineLength = 2 * carbonCount + 3;
-		break;;
+		break;
+	case Suffix::Aldehyd:
+		hydrogenCount = 2 * carbonCount;
+		oxygenCount = 1;
+		lineLength = 2 * carbonCount + 1;
+		break;
 	default:
 		exit(0);
 	}
@@ -133,13 +139,15 @@ int main() {
 		if(carbonCount != 1)
 			formula += std::to_string(carbonCount);
 		formula += 'H';
-		formula	+= std::to_string(hydrogenCount - (oxygenCount == 1));
+		formula	+= std::to_string(hydrogenCount - (suffix == Suffix::Alkohol));
 		if(oxygenCount) {
 			formula += 'O';
-			if(oxygenCount == 1)
+			if(suffix == Suffix::Alkohol)
 				formula += 'H';
-			else
-				formula += std::to_string(oxygenCount);
+			else {
+				if(oxygenCount != 1)
+					formula += std::to_string(oxygenCount);
+			}
 		}
 	}
 
@@ -149,13 +157,13 @@ int main() {
 		lineLength = formula.length();
 
 	std::cout << "┌";
-	for(unsigned int i = 0; i < lineLength; i++)
+	for(int i = 0; i < lineLength; i++)
 		std::cout << "─";
 	std::cout << "┐\n│" << std::setw(lineLength) << std::left << input << "│\n├";
-	for(unsigned int i = 0; i < lineLength; i++)
+	for(int i = 0; i < lineLength; i++)
 		std::cout << "─";
 	std::cout << "┤\n│" << std::setw(lineLength) << formula << "│\n╞";
-	for(unsigned int i = 0; i < lineLength; i++)
+	for(int i = 0; i < lineLength; i++)
 		std::cout << "═";
 	std::cout << "╡\n";
 
@@ -163,44 +171,44 @@ int main() {
 	switch(suffix) {
 	case Suffix::Alkan:
 		std::cout << "│  ";
-		for(unsigned int i = 0; i < carbonCount; i++)
+		for(int i = 0; i < carbonCount; i++)
 			std::cout << "H ";
 		std::cout << " │\n│  ";
-		for(unsigned int i = 0; i < carbonCount; i++)
+		for(int i = 0; i < carbonCount; i++)
 			std::cout << "│ ";
 		std::cout << " │\n│H─";
-		for(unsigned int i = 0; i < carbonCount; i++)
+		for(int i = 0; i < carbonCount; i++)
 			std::cout << "C─";
 		std::cout << "H│\n│  ";
-		for(unsigned int i = 0; i < carbonCount; i++)
+		for(int i = 0; i < carbonCount; i++)
 			std::cout << "│ ";
 		std::cout << " │\n│  ";
-		for(unsigned int i = 0; i < carbonCount; i++)
+		for(int i = 0; i < carbonCount; i++)
 			std::cout << "H ";
 		std::cout << " │\n└";
-		for(unsigned int i = 0; i < lineLength; i++)
+		for(int i = 0; i < lineLength; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
 	
 	case Suffix::Alken:
 		std::cout << "│";
-		for(unsigned int i = 0; i < carbonCount; i++)
+		for(int i = 0; i < carbonCount; i++)
 			std::cout << "H ";
 		std::cout << " │\n│";
-		for(unsigned int i = 0; i < carbonCount; i++)
+		for(int i = 0; i < carbonCount; i++)
 			std::cout << "│ ";
 		std::cout << " │\n│C═";
-		for(unsigned int i = 0; i < carbonCount - 1; i++)
+		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "C─";
 		std::cout << "H│\n││   ";
-		for(unsigned int i = 0; i < carbonCount - 2; i++)
+		for(int i = 0; i < carbonCount - 2; i++)
 			std::cout << "│ ";
 		std::cout << " │\n│H   ";;
-		for(unsigned int i = 0; i < carbonCount - 2; i++)
+		for(int i = 0; i < carbonCount - 2; i++)
 			std::cout << "H ";
 		std::cout << " │\n└";
-		for(unsigned int i = 0; i < lineLength; i++)
+		for(int i = 0; i < lineLength; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
@@ -208,90 +216,128 @@ int main() {
 	case Suffix::Alkyn:
 		if(prefix != Prefix::Et) {
 			std::cout << "│      ";
-			for(unsigned int i = 0; i < carbonCount - 2; i++)
+			for(int i = 0; i < carbonCount - 2; i++)
 				std::cout << "H ";
 			std::cout << " │\n│      ";
-			for(unsigned int i = 0; i < carbonCount - 2; i++)
+			for(int i = 0; i < carbonCount - 2; i++)
 				std::cout << "│ ";
 			std::cout << " │\n";
 		}
 		std::cout << "│H─C≡";
-		for(unsigned int i = 0; i < carbonCount - 1; i++) {
+		for(int i = 0; i < carbonCount - 1; i++) {
 			std::cout << "C─";
 		}
 		std::cout << "H│\n";
 		if(prefix != Prefix::Et) {
 			std::cout << "│      ";
-			for(unsigned int i = 0; i < carbonCount - 2; i++)
+			for(int i = 0; i < carbonCount - 2; i++)
 				std::cout << "│ ";
 			std::cout << " │\n│      ";
-			for(unsigned int i = 0; i < carbonCount - 2; i++)
+			for(int i = 0; i < carbonCount - 2; i++)
 				std::cout << "H ";
 			std::cout << " │\n";
 		}
 		std::cout << "└";
-		for(unsigned int i = 0; i < lineLength; i++)
+		for(int i = 0; i < lineLength; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
 
 	case Suffix::Alkohol:
 		std::cout << "│  ";
-		for(unsigned int i = 0; i < carbonCount; i++)
+		for(int i = 0; i < carbonCount; i++)
 			std::cout << "H ";
 		std::cout << "   │\n│  ";
-		for(unsigned int i = 0; i < carbonCount; i++)
+		for(int i = 0; i < carbonCount; i++)
 			std::cout << "│ ";
 		std::cout << "   │\n│H─";
-		for(unsigned int i = 0; i < carbonCount; i++)
+		for(int i = 0; i < carbonCount; i++)
 			std::cout << "C─";
-		std::cout << "O-H│\n│  ";
-		for(unsigned int i = 0; i < carbonCount; i++)
+		std::cout << "O─H│\n│  ";
+		for(int i = 0; i < carbonCount; i++)
 			std::cout << "│ ";
 		std::cout << "   │\n│  ";
-		for(unsigned int i = 0; i < carbonCount; i++)
+		for(int i = 0; i < carbonCount; i++)
 			std::cout << "H ";
 		std::cout << "   │\n└";
-		for(unsigned int i = 0; i < lineLength; i++)
+		for(int i = 0; i < lineLength; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
 
 	case Suffix::Syra:
 		std::cout << "│  ";
-		for(unsigned int i = 0; i < carbonCount - 1; i++)
+		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "H ";
 		std::cout << "O  ";
-		for(unsigned int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+		for(int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
 			std::cout << ' ';
 		std::cout << "│\n│  ";
-		for(unsigned int i = 0; i < carbonCount - 1; i++)
+		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "│ ";
 		std::cout << "‖  ";
-		for(unsigned int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+		for(int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
 			std::cout << ' ';
 		std::cout << "│\n│H─";
-		for(unsigned int i = 0; i < carbonCount - 1; i++)
+		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "C─";
 		std::cout << "C  ";
-		for(unsigned int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+		for(int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
 			std::cout << ' ';
 		std::cout << "│\n│  ";
-		for(unsigned int i = 0; i < carbonCount; i++)
+		for(int i = 0; i < carbonCount; i++)
 			std::cout << "│ ";
-		for(unsigned int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+		for(int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
 			std::cout << ' ';
 		std::cout << " │\n│  ";
-		for(unsigned int i = 0; i < carbonCount - 1; i++)
+		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "H ";
 		std::cout << "O─H";
-		for(unsigned int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+		for(int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
 			std::cout << ' ';
 		std::cout << "│\n└";
-		for(unsigned int i = 0; i < lineLength; i++)
+		for(int i = 0; i < lineLength; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
+
+	case Suffix::Aldehyd:
+		std::cout << "│  ";
+		for(int i = 0; i < carbonCount - 1; i++)
+			std::cout << "H ";
+		std::cout << 'O';
+		for(int i = 0; i < lineLength - (2 * carbonCount + 1); i++)
+			std::cout << ' ';
+		std::cout << "│\n│  ";
+		for(int i = 0; i < carbonCount - 1; i++)
+			std::cout << "│ ";
+		std::cout << "‖";
+		for(int i = 0; i < lineLength - (2 * carbonCount + 1); i++)
+			std::cout << ' ';
+		std::cout << "│\n│H─";
+		for(int i = 0; i < carbonCount - 1; i++)
+			std::cout << "C─";
+		std::cout << 'C';
+		for(int i = 0; i < lineLength - (2 * carbonCount + 1); i++)
+			std::cout << ' ';
+		std::cout << "│\n│  ";
+		for(int i = 0; i < carbonCount - 1; i++)
+			std::cout << "│ ";
+		std::cout << "│";
+		for(int i = 0; i < lineLength - (2 * carbonCount + 1); i++)
+			std::cout << ' ';
+		std::cout << "│\n│  ";
+		for(int i = 0; i < carbonCount - 1; i++)
+			std::cout << "H ";
+		std::cout << 'H';
+		for(int i = 0; i < lineLength - (2 * carbonCount + 1); i++)
+			std::cout << ' ';
+		std::cout << "│\n└";
+		for(int i = 0; i < lineLength; i++)
+			std::cout << "─";
+		std::cout << "┘";
+		break;
+	
 
 	default:
 		exit(0);
