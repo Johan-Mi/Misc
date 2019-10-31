@@ -19,44 +19,44 @@ int main() {
 		if(c >= 'A' && c <= 'Z')
 			c += 32;
 	}
+	input[0] -= 32;
 
-	std::string formattedName = input;
-	formattedName[0] -= 32;
+	std::string_view inputView(input);
 
 	enum class Prefix {
 		Met = 1, Et, Prop, But, Pent, Hex, Hept, Okt, Non, Dek
 	} prefix;
-	
-	if(input.rfind("met", 0) == 0) {
+
+	if(inputView.rfind("Met", 0) == 0) {
 		prefix = Prefix::Met;
-		input = std::string(input.c_str() + 3);
-	} else if(input.rfind("et", 0) == 0) {
+		inputView.remove_prefix(3);
+	} else if(inputView.rfind("Et", 0) == 0) {
 		prefix = Prefix::Et;
-		input = std::string(input.c_str() + 2);
-	} else if(input.rfind("prop", 0) == 0) {
+		inputView.remove_prefix(2);
+	} else if(inputView.rfind("Prop", 0) == 0) {
 		prefix = Prefix::Prop;
-		input = std::string(input.c_str() + 4);
-	} else if(input.rfind("but", 0) == 0) {
+		inputView.remove_prefix(4);
+	} else if(inputView.rfind("But", 0) == 0) {
 		prefix = Prefix::But;
-		input = std::string(input.c_str() + 3);
-	} else if(input.rfind("pent", 0) == 0) {
+		inputView.remove_prefix(3);
+	} else if(inputView.rfind("Pent", 0) == 0) {
 		prefix = Prefix::Pent;
-		input = std::string(input.c_str() + 4);
-	} else if(input.rfind("hex", 0) == 0) {
+		inputView.remove_prefix(4);
+	} else if(inputView.rfind("Hex", 0) == 0) {
 		prefix = Prefix::Hex;
-		input = std::string(input.c_str() + 3);
-	} else if(input.rfind("hept", 0) == 0) {
+		inputView.remove_prefix(3);
+	} else if(inputView.rfind("Hept", 0) == 0) {
 		prefix = Prefix::Hept;
-		input = std::string(input.c_str() + 4);
-	} else if(input.rfind("okt", 0) == 0) {
+		inputView.remove_prefix(4);
+	} else if(inputView.rfind("Okt", 0) == 0) {
 		prefix = Prefix::Okt;
-		input = std::string(input.c_str() + 3);
-	} else if(input.rfind("non", 0) == 0) {
+		inputView.remove_prefix(3);
+	} else if(inputView.rfind("Non", 0) == 0) {
 		prefix = Prefix::Non;
-		input = std::string(input.c_str() + 3);
-	} else if(input.rfind("dek", 0) == 0) {
+		inputView.remove_prefix(3);
+	} else if(inputView.rfind("Dek", 0) == 0) {
 		prefix = Prefix::Dek;
-		input = std::string(input.c_str() + 3);
+		inputView.remove_prefix(3);
 	} else {
 		fail();
 	}	
@@ -73,16 +73,17 @@ int main() {
 		{"ansyra", Suffix::Syra}
 	};
 
-	if(suffixMap.find(input) == suffixMap.end())
+	if(suffixMap.find(inputView) == suffixMap.end())
 		fail();
 
-	suffix = suffixMap.at(input);
+	suffix = suffixMap.at(inputView);
 
 	if(prefix == Prefix::Met && (suffix == Suffix::Alken || suffix == Suffix::Alkyn))
 		fail();
 
 	unsigned int carbonCount = static_cast<unsigned int>(prefix);
 	unsigned int hydrogenCount;
+	unsigned int oxygenCount = 0;
 	unsigned int lineLength;
 
 	switch(suffix) {
@@ -98,21 +99,59 @@ int main() {
 		hydrogenCount = 2 * carbonCount - 2;
 		lineLength = 2 * carbonCount + 3;
 		break;
+	case Suffix::Alkohol:
+		hydrogenCount = 2 * carbonCount + 2;
+		oxygenCount = 1;
+		lineLength = 2 * carbonCount + 5;
+		break;
+	case Suffix::Syra:
+		hydrogenCount = 2 * carbonCount;
+		oxygenCount = 2;
+		lineLength = 2 * carbonCount + 3;
+		break;;
 	default:
-		std::cout << "Alkoholer och syror är inte implementerade än\n\n";
 		exit(0);
 	}
 	
-	std::string formula = "C";
-	if(carbonCount != 1)
-		formula += std::to_string(carbonCount);
-	formula += 'H';
-	formula	+= std::to_string(hydrogenCount);
+	std::string formula{};
+	if(suffix == Suffix::Syra) {
+		if(prefix != Prefix::Met)	 {
+			formula = "CH3";
+			if(prefix != Prefix::Et) {
+				if(prefix != Prefix::Prop)
+					formula += '(';
+				formula += "CH2";
+				if(prefix != Prefix::Prop) {
+					formula += ')';
+					formula += std::to_string(static_cast<int>(prefix) - 2);
+				}
+			}
+		}
+		formula += "COOH";
+	} else {
+		formula = "C";
+		if(carbonCount != 1)
+			formula += std::to_string(carbonCount);
+		formula += 'H';
+		formula	+= std::to_string(hydrogenCount - (oxygenCount == 1));
+		if(oxygenCount) {
+			formula += 'O';
+			if(oxygenCount == 1)
+				formula += 'H';
+			else
+				formula += std::to_string(oxygenCount);
+		}
+	}
+
+	if(input.length() > lineLength)
+		lineLength = input.length();
+	if(formula.length() > lineLength)
+		lineLength = formula.length();
 
 	std::cout << "┌";
 	for(unsigned int i = 0; i < lineLength; i++)
 		std::cout << "─";
-	std::cout << "┐\n│" << std::setw(lineLength) << std::left << formattedName << "│\n├";
+	std::cout << "┐\n│" << std::setw(lineLength) << std::left << input << "│\n├";
 	for(unsigned int i = 0; i < lineLength; i++)
 		std::cout << "─";
 	std::cout << "┤\n│" << std::setw(lineLength) << formula << "│\n╞";
@@ -196,8 +235,66 @@ int main() {
 		std::cout << "┘";
 		break;
 
-	default:
+	case Suffix::Alkohol:
+		std::cout << "│  ";
+		for(unsigned int i = 0; i < carbonCount; i++)
+			std::cout << "H ";
+		std::cout << "   │\n│  ";
+		for(unsigned int i = 0; i < carbonCount; i++)
+			std::cout << "│ ";
+		std::cout << "   │\n│H─";
+		for(unsigned int i = 0; i < carbonCount; i++)
+			std::cout << "C─";
+		std::cout << "O-H│\n│  ";
+		for(unsigned int i = 0; i < carbonCount; i++)
+			std::cout << "│ ";
+		std::cout << "   │\n│  ";
+		for(unsigned int i = 0; i < carbonCount; i++)
+			std::cout << "H ";
+		std::cout << "   │\n└";
+		for(unsigned int i = 0; i < lineLength; i++)
+			std::cout << "─";
+		std::cout << "┘";
 		break;
+
+	case Suffix::Syra:
+		std::cout << "│  ";
+		for(unsigned int i = 0; i < carbonCount - 1; i++)
+			std::cout << "H ";
+		std::cout << "O  ";
+		for(unsigned int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+			std::cout << ' ';
+		std::cout << "│\n│  ";
+		for(unsigned int i = 0; i < carbonCount - 1; i++)
+			std::cout << "│ ";
+		std::cout << "‖  ";
+		for(unsigned int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+			std::cout << ' ';
+		std::cout << "│\n│H─";
+		for(unsigned int i = 0; i < carbonCount - 1; i++)
+			std::cout << "C─";
+		std::cout << "C  ";
+		for(unsigned int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+			std::cout << ' ';
+		std::cout << "│\n│  ";
+		for(unsigned int i = 0; i < carbonCount; i++)
+			std::cout << "│ ";
+		for(unsigned int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+			std::cout << ' ';
+		std::cout << " │\n│  ";
+		for(unsigned int i = 0; i < carbonCount - 1; i++)
+			std::cout << "H ";
+		std::cout << "O─H";
+		for(unsigned int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+			std::cout << ' ';
+		std::cout << "│\n└";
+		for(unsigned int i = 0; i < lineLength; i++)
+			std::cout << "─";
+		std::cout << "┘";
+		break;
+
+	default:
+		exit(0);
 	}
 
 	std::cout << "\n\n";
