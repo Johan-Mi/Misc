@@ -3,13 +3,29 @@
 #include <unordered_map>
 #include <string_view>
 #include <iomanip>
+#include <wchar.h>
+#include <wctype.h>
+#include <locale.h>
+#include <string.h>
+#include <unistd.h>
 
 [[noreturn]]void fail() {
 	std::cout << "Ogiltigt ämne\n\n";
 	exit(0);
 }
 
+void writeWchar(wchar_t c) {
+	mbstate_t state;
+	memset(&state, 0, sizeof(state));
+	char mbbuf[MB_CUR_MAX];
+	size_t nbytes = wcrtomb(mbbuf, c, &state);
+	if(!(nbytes == (size_t)-1 || nbytes > (size_t)MB_CUR_MAX))
+		[[maybe_unused]] auto discard = write(STDIN_FILENO, mbbuf, nbytes);
+}
+
 int main() {
+	setlocale(LC_ALL, "");
+
 	std::cout << "Skriv ett organiskt ämne: ";
 	std::string input;
 	std::cin >> input;
@@ -85,35 +101,38 @@ int main() {
 	int carbonCount = static_cast<int>(prefix);
 	int hydrogenCount;
 	int oxygenCount = 0;
-	int lineLength;
+	int picWidth;
+	int picHeight = 5;
 
 	switch(suffix) {
 	case Suffix::Alkan:
 		hydrogenCount = 2 * carbonCount + 2;
-		lineLength = 2 * carbonCount + 3;
+		picWidth = 2 * carbonCount + 3;
 		break;
 	case Suffix::Alken:
 		hydrogenCount = 2 * carbonCount;
-		lineLength = 2 * carbonCount + 1;
+		picWidth = 2 * carbonCount + 1;
 		break;
 	case Suffix::Alkyn:
 		hydrogenCount = 2 * carbonCount - 2;
-		lineLength = 2 * carbonCount + 3;
+		picWidth = 2 * carbonCount + 3;
+		if(prefix == Prefix::Et)
+			picHeight = 1;
 		break;
 	case Suffix::Alkohol:
 		hydrogenCount = 2 * carbonCount + 2;
 		oxygenCount = 1;
-		lineLength = 2 * carbonCount + 5;
+		picWidth = 2 * carbonCount + 5;
 		break;
 	case Suffix::Syra:
 		hydrogenCount = 2 * carbonCount;
 		oxygenCount = 2;
-		lineLength = 2 * carbonCount + 3;
+		picWidth = 2 * carbonCount + 3;
 		break;
 	case Suffix::Aldehyd:
 		hydrogenCount = 2 * carbonCount;
 		oxygenCount = 1;
-		lineLength = 2 * carbonCount + 1;
+		picWidth = 2 * carbonCount + 1;
 		break;
 	default:
 		exit(0);
@@ -151,23 +170,83 @@ int main() {
 		}
 	}
 
-	if(input.length() > lineLength)
-		lineLength = input.length();
-	if(formula.length() > lineLength)
-		lineLength = formula.length();
+	if(input.length() > picWidth)
+		picWidth = input.length();
+	if(formula.length() > picWidth)
+		picWidth = formula.length();
+
+	auto pic = new wchar_t*[picHeight];
+	for(int i = 0; i < picHeight; i++) {
+		pic[i] = new wchar_t[picWidth];	
+		for(int j = 0; j < picWidth; j++)
+			pic[i][j] = L' ';
+	}
+
+	switch(suffix) {
+	case Suffix::Alkan:
+		pic[2][0] = L'H';
+		pic[2][1] = L'─';
+		pic[2][picWidth - 1] = L'H';
+		for(int i = 0; i < 2 * carbonCount; i += 2) {
+			pic[0][i + 2] = L'H';
+			pic[1][i + 2] = L'│';
+			pic[2][i + 2] = L'C';
+			pic[3][i + 2] = L'│';
+			pic[4][i + 2] = L'H';
+			pic[2][i + 3] = L'─';
+		}
+		break;
+
+	case Suffix::Alken:
+		pic[0][0] = L'H';
+		pic[1][0] = L'│';
+		pic[2][0] = L'C';
+		pic[3][0] = L'│';
+		pic[4][0] = L'H';
+		pic[2][1] = L'═';
+		pic[0][2] = L'H';
+		pic[1][2] = L'│';
+		pic[2][2] = L'C';
+		pic[2][picWidth - 2] = L'─';
+		pic[2][picWidth - 1] = L'H';
+		for(int i = 0; i < 2 * carbonCount - 4; i += 2) {
+			pic[0][i + 4] = L'H';
+			pic[1][i + 4] = L'│';
+			pic[2][i + 4] = L'C';
+			pic[3][i + 4] = L'│';
+			pic[4][i + 4] = L'H';
+			pic[2][i + 3] = L'─';
+		}
+		break;
+	
+	default:
+		break;
+	}
 
 	std::cout << "┌";
-	for(int i = 0; i < lineLength; i++)
+	for(int i = 0; i < picWidth; i++)
 		std::cout << "─";
-	std::cout << "┐\n│" << std::setw(lineLength) << std::left << input << "│\n├";
-	for(int i = 0; i < lineLength; i++)
+	std::cout << "┐\n│" << std::setw(picWidth) << std::left << input << "│\n├";
+	for(int i = 0; i < picWidth; i++)
 		std::cout << "─";
-	std::cout << "┤\n│" << std::setw(lineLength) << formula << "│\n╞";
-	for(int i = 0; i < lineLength; i++)
+	std::cout << "┤\n│" << std::setw(picWidth) << formula << "│\n╞";
+	for(int i = 0; i < picWidth; i++)
 		std::cout << "═";
 	std::cout << "╡\n";
 
+	for(int i = 0; i < picHeight; i++) {
+		std::cout << "│" << std::flush;
+		for(int j = 0; j < picWidth; j++)
+			writeWchar(pic[i][j]);
+		std::cout << "│\n";
+	}
 
+	std::cout << "└";
+	for(int i = 0; i < picWidth; i++)
+		std::cout << "─";
+	std::cout << "┘\n\n";
+
+/*
 	switch(suffix) {
 	case Suffix::Alkan:
 		std::cout << "│  ";
@@ -186,7 +265,7 @@ int main() {
 		for(int i = 0; i < carbonCount; i++)
 			std::cout << "H ";
 		std::cout << " │\n└";
-		for(int i = 0; i < lineLength; i++)
+		for(int i = 0; i < picWidth; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
@@ -208,7 +287,7 @@ int main() {
 		for(int i = 0; i < carbonCount - 2; i++)
 			std::cout << "H ";
 		std::cout << " │\n└";
-		for(int i = 0; i < lineLength; i++)
+		for(int i = 0; i < picWidth; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
@@ -238,7 +317,7 @@ int main() {
 			std::cout << " │\n";
 		}
 		std::cout << "└";
-		for(int i = 0; i < lineLength; i++)
+		for(int i = 0; i < picWidth; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
@@ -260,7 +339,7 @@ int main() {
 		for(int i = 0; i < carbonCount; i++)
 			std::cout << "H ";
 		std::cout << "   │\n└";
-		for(int i = 0; i < lineLength; i++)
+		for(int i = 0; i < picWidth; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
@@ -270,33 +349,33 @@ int main() {
 		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "H ";
 		std::cout << "O  ";
-		for(int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+		for(int i = 0; i < picWidth - (2 * carbonCount + 3); i++)
 			std::cout << ' ';
 		std::cout << "│\n│  ";
 		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "│ ";
 		std::cout << "‖  ";
-		for(int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+		for(int i = 0; i < picWidth - (2 * carbonCount + 3); i++)
 			std::cout << ' ';
 		std::cout << "│\n│H─";
 		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "C─";
 		std::cout << "C  ";
-		for(int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+		for(int i = 0; i < picWidth - (2 * carbonCount + 3); i++)
 			std::cout << ' ';
 		std::cout << "│\n│  ";
 		for(int i = 0; i < carbonCount; i++)
 			std::cout << "│ ";
-		for(int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+		for(int i = 0; i < picWidth - (2 * carbonCount + 3); i++)
 			std::cout << ' ';
 		std::cout << " │\n│  ";
 		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "H ";
 		std::cout << "O─H";
-		for(int i = 0; i < lineLength - (2 * carbonCount + 3); i++)
+		for(int i = 0; i < picWidth - (2 * carbonCount + 3); i++)
 			std::cout << ' ';
 		std::cout << "│\n└";
-		for(int i = 0; i < lineLength; i++)
+		for(int i = 0; i < picWidth; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
@@ -306,34 +385,34 @@ int main() {
 		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "H ";
 		std::cout << 'O';
-		for(int i = 0; i < lineLength - (2 * carbonCount + 1); i++)
+		for(int i = 0; i < picWidth - (2 * carbonCount + 1); i++)
 			std::cout << ' ';
 		std::cout << "│\n│  ";
 		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "│ ";
 		std::cout << "‖";
-		for(int i = 0; i < lineLength - (2 * carbonCount + 1); i++)
+		for(int i = 0; i < picWidth - (2 * carbonCount + 1); i++)
 			std::cout << ' ';
 		std::cout << "│\n│H─";
 		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "C─";
 		std::cout << 'C';
-		for(int i = 0; i < lineLength - (2 * carbonCount + 1); i++)
+		for(int i = 0; i < picWidth - (2 * carbonCount + 1); i++)
 			std::cout << ' ';
 		std::cout << "│\n│  ";
 		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "│ ";
 		std::cout << "│";
-		for(int i = 0; i < lineLength - (2 * carbonCount + 1); i++)
+		for(int i = 0; i < picWidth - (2 * carbonCount + 1); i++)
 			std::cout << ' ';
 		std::cout << "│\n│  ";
 		for(int i = 0; i < carbonCount - 1; i++)
 			std::cout << "H ";
 		std::cout << 'H';
-		for(int i = 0; i < lineLength - (2 * carbonCount + 1); i++)
+		for(int i = 0; i < picWidth - (2 * carbonCount + 1); i++)
 			std::cout << ' ';
 		std::cout << "│\n└";
-		for(int i = 0; i < lineLength; i++)
+		for(int i = 0; i < picWidth; i++)
 			std::cout << "─";
 		std::cout << "┘";
 		break;
@@ -342,8 +421,13 @@ int main() {
 	default:
 		exit(0);
 	}
+*/
 
 	std::cout << "\n\n";
+
+	for(int i = 0; i < picHeight; i++)
+		delete[] pic[i];
+	delete pic;	
 
 	return 0;
 }
