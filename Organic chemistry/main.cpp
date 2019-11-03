@@ -218,7 +218,77 @@ int main() {
 			pic[2][i + 3] = L'─';
 		}
 		break;
+
+	case Suffix::Alkyn: {
+		int offset = prefix == Prefix::Et ? 0 : 2;
+		pic[offset][0] = L'H';
+		pic[offset][1] = L'─';
+		pic[offset][2] = L'C';
+		pic[offset][3] = L'≡';
+		pic[offset][4] = L'C';
+		pic[offset][picWidth - 2] = L'─';
+		pic[offset][picWidth - 1] = L'H';
+		for(int i = 0; i < 2 * carbonCount - 4; i += 2) {
+			pic[0][i + 6] = L'H';
+			pic[1][i + 6] = L'│';
+			pic[2][i + 6] = L'C';
+			pic[3][i + 6] = L'│';
+			pic[4][i + 6] = L'H';
+			pic[2][i + 5] = L'─';
+		}
+		break;
+	}
 	
+	case Suffix::Alkohol:
+		pic[2][0] = L'H';
+		pic[2][1] = L'─';
+		pic[2][picWidth - 3] = L'O';
+		pic[2][picWidth - 2] = L'─';
+		pic[2][picWidth - 1] = L'H';
+		for(int i = 0; i < 2 * carbonCount; i += 2) {
+			pic[0][i + 2] = L'H';
+			pic[1][i + 2] = L'│';
+			pic[2][i + 2] = L'C';
+			pic[3][i + 2] = L'│';
+			pic[4][i + 2] = L'H';
+			pic[2][i + 3] = L'─';
+		}
+		break;
+
+	case Suffix::Syra:
+		pic[2][0] = L'H';
+		pic[2][1] = L'─';
+		pic[0][carbonCount * 2] = L'O';
+		pic[1][carbonCount * 2] = L'‖';
+		pic[2][carbonCount * 2] = L'C';
+		pic[3][carbonCount * 2] = L'│';
+		pic[4][carbonCount * 2] = L'O';
+		pic[4][carbonCount * 2 + 1] = L'─';
+		pic[4][carbonCount * 2 + 2] = L'H';
+		for(int i = 0; i < 2 * carbonCount - 2; i += 2) {
+			pic[0][i + 2] = L'H';
+			pic[1][i + 2] = L'│';
+			pic[2][i + 2] = L'C';
+			pic[3][i + 2] = L'│';
+			pic[4][i + 2] = L'H';
+			pic[2][i + 3] = L'─';
+		}
+		break;
+
+	case Suffix::Aldehyd:
+		pic[2][0] = L'H';
+		for(int i = 0; i < 2 * carbonCount; i += 2) {
+			pic[0][i + 2] = L'H';
+			pic[1][i + 2] = L'│';
+			pic[2][i + 2] = L'C';
+			pic[3][i + 2] = L'│';
+			pic[4][i + 2] = L'H';
+			pic[2][i + 1] = L'─';
+		}
+		pic[0][carbonCount * 2] = L'O';
+		pic[1][carbonCount * 2] = L'‖';
+		break;
+
 	default:
 		break;
 	}
@@ -245,185 +315,6 @@ int main() {
 	for(int i = 0; i < picWidth; i++)
 		std::cout << "─";
 	std::cout << "┘\n\n";
-
-/*
-	switch(suffix) {
-	case Suffix::Alkan:
-		std::cout << "│  ";
-		for(int i = 0; i < carbonCount; i++)
-			std::cout << "H ";
-		std::cout << " │\n│  ";
-		for(int i = 0; i < carbonCount; i++)
-			std::cout << "│ ";
-		std::cout << " │\n│H─";
-		for(int i = 0; i < carbonCount; i++)
-			std::cout << "C─";
-		std::cout << "H│\n│  ";
-		for(int i = 0; i < carbonCount; i++)
-			std::cout << "│ ";
-		std::cout << " │\n│  ";
-		for(int i = 0; i < carbonCount; i++)
-			std::cout << "H ";
-		std::cout << " │\n└";
-		for(int i = 0; i < picWidth; i++)
-			std::cout << "─";
-		std::cout << "┘";
-		break;
-	
-	case Suffix::Alken:
-		std::cout << "│";
-		for(int i = 0; i < carbonCount; i++)
-			std::cout << "H ";
-		std::cout << " │\n│";
-		for(int i = 0; i < carbonCount; i++)
-			std::cout << "│ ";
-		std::cout << " │\n│C═";
-		for(int i = 0; i < carbonCount - 1; i++)
-			std::cout << "C─";
-		std::cout << "H│\n││   ";
-		for(int i = 0; i < carbonCount - 2; i++)
-			std::cout << "│ ";
-		std::cout << " │\n│H   ";;
-		for(int i = 0; i < carbonCount - 2; i++)
-			std::cout << "H ";
-		std::cout << " │\n└";
-		for(int i = 0; i < picWidth; i++)
-			std::cout << "─";
-		std::cout << "┘";
-		break;
-
-	case Suffix::Alkyn:
-		if(prefix != Prefix::Et) {
-			std::cout << "│      ";
-			for(int i = 0; i < carbonCount - 2; i++)
-				std::cout << "H ";
-			std::cout << " │\n│      ";
-			for(int i = 0; i < carbonCount - 2; i++)
-				std::cout << "│ ";
-			std::cout << " │\n";
-		}
-		std::cout << "│H─C≡";
-		for(int i = 0; i < carbonCount - 1; i++) {
-			std::cout << "C─";
-		}
-		std::cout << "H│\n";
-		if(prefix != Prefix::Et) {
-			std::cout << "│      ";
-			for(int i = 0; i < carbonCount - 2; i++)
-				std::cout << "│ ";
-			std::cout << " │\n│      ";
-			for(int i = 0; i < carbonCount - 2; i++)
-				std::cout << "H ";
-			std::cout << " │\n";
-		}
-		std::cout << "└";
-		for(int i = 0; i < picWidth; i++)
-			std::cout << "─";
-		std::cout << "┘";
-		break;
-
-	case Suffix::Alkohol:
-		std::cout << "│  ";
-		for(int i = 0; i < carbonCount; i++)
-			std::cout << "H ";
-		std::cout << "   │\n│  ";
-		for(int i = 0; i < carbonCount; i++)
-			std::cout << "│ ";
-		std::cout << "   │\n│H─";
-		for(int i = 0; i < carbonCount; i++)
-			std::cout << "C─";
-		std::cout << "O─H│\n│  ";
-		for(int i = 0; i < carbonCount; i++)
-			std::cout << "│ ";
-		std::cout << "   │\n│  ";
-		for(int i = 0; i < carbonCount; i++)
-			std::cout << "H ";
-		std::cout << "   │\n└";
-		for(int i = 0; i < picWidth; i++)
-			std::cout << "─";
-		std::cout << "┘";
-		break;
-
-	case Suffix::Syra:
-		std::cout << "│  ";
-		for(int i = 0; i < carbonCount - 1; i++)
-			std::cout << "H ";
-		std::cout << "O  ";
-		for(int i = 0; i < picWidth - (2 * carbonCount + 3); i++)
-			std::cout << ' ';
-		std::cout << "│\n│  ";
-		for(int i = 0; i < carbonCount - 1; i++)
-			std::cout << "│ ";
-		std::cout << "‖  ";
-		for(int i = 0; i < picWidth - (2 * carbonCount + 3); i++)
-			std::cout << ' ';
-		std::cout << "│\n│H─";
-		for(int i = 0; i < carbonCount - 1; i++)
-			std::cout << "C─";
-		std::cout << "C  ";
-		for(int i = 0; i < picWidth - (2 * carbonCount + 3); i++)
-			std::cout << ' ';
-		std::cout << "│\n│  ";
-		for(int i = 0; i < carbonCount; i++)
-			std::cout << "│ ";
-		for(int i = 0; i < picWidth - (2 * carbonCount + 3); i++)
-			std::cout << ' ';
-		std::cout << " │\n│  ";
-		for(int i = 0; i < carbonCount - 1; i++)
-			std::cout << "H ";
-		std::cout << "O─H";
-		for(int i = 0; i < picWidth - (2 * carbonCount + 3); i++)
-			std::cout << ' ';
-		std::cout << "│\n└";
-		for(int i = 0; i < picWidth; i++)
-			std::cout << "─";
-		std::cout << "┘";
-		break;
-
-	case Suffix::Aldehyd:
-		std::cout << "│  ";
-		for(int i = 0; i < carbonCount - 1; i++)
-			std::cout << "H ";
-		std::cout << 'O';
-		for(int i = 0; i < picWidth - (2 * carbonCount + 1); i++)
-			std::cout << ' ';
-		std::cout << "│\n│  ";
-		for(int i = 0; i < carbonCount - 1; i++)
-			std::cout << "│ ";
-		std::cout << "‖";
-		for(int i = 0; i < picWidth - (2 * carbonCount + 1); i++)
-			std::cout << ' ';
-		std::cout << "│\n│H─";
-		for(int i = 0; i < carbonCount - 1; i++)
-			std::cout << "C─";
-		std::cout << 'C';
-		for(int i = 0; i < picWidth - (2 * carbonCount + 1); i++)
-			std::cout << ' ';
-		std::cout << "│\n│  ";
-		for(int i = 0; i < carbonCount - 1; i++)
-			std::cout << "│ ";
-		std::cout << "│";
-		for(int i = 0; i < picWidth - (2 * carbonCount + 1); i++)
-			std::cout << ' ';
-		std::cout << "│\n│  ";
-		for(int i = 0; i < carbonCount - 1; i++)
-			std::cout << "H ";
-		std::cout << 'H';
-		for(int i = 0; i < picWidth - (2 * carbonCount + 1); i++)
-			std::cout << ' ';
-		std::cout << "│\n└";
-		for(int i = 0; i < picWidth; i++)
-			std::cout << "─";
-		std::cout << "┘";
-		break;
-	
-
-	default:
-		exit(0);
-	}
-*/
-
-	std::cout << "\n\n";
 
 	for(int i = 0; i < picHeight; i++)
 		delete[] pic[i];
