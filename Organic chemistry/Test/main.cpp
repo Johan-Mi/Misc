@@ -1,11 +1,12 @@
 #include <string>
 #include <iostream>
-#include <ctime>
 #include <wchar.h>
 #include <wctype.h>
 #include <locale.h>
 #include <string.h>
 #include <unistd.h>
+#include <random>
+#include <chrono>
 
 void writeWchar(wchar_t c) {
 	mbstate_t state;
@@ -26,17 +27,17 @@ enum class Suffix {
 
 int main() {
 	setlocale(LC_ALL, "");
-	srand(time(0));
+	std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
 
 	while(true) {
 		Prefix prefix;
 		Suffix suffix;
 
-		suffix = static_cast<Suffix>(rand() % 5);
+		suffix = static_cast<Suffix>(rng() % 5);
 		if(suffix == Suffix::Alken || suffix == Suffix::Alkyn)
-			prefix = static_cast<Prefix>(rand() % 9 + 2);
+			prefix = static_cast<Prefix>(rng() % 9 + 2);
 		else
-			prefix = static_cast<Prefix>(rand() % 10 + 1);
+			prefix = static_cast<Prefix>(rng() % 10 + 1);
 
 		if(rand() % 2) {
 			int carbonCount = static_cast<int>(prefix);
