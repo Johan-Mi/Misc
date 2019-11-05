@@ -10,10 +10,10 @@
 void writeWchar(wchar_t c) {
 	mbstate_t state;
 	memset(&state, 0, sizeof(state));
-	char mbbuf[MB_CUR_MAX];
+	char mbbuf[MB_CUR_MAX + 1];
 	size_t nbytes = wcrtomb(mbbuf, c, &state);
-	if(!(nbytes == (size_t)-1 || nbytes > (size_t)MB_CUR_MAX))
-		[[maybe_unused]] auto discard = write(STDIN_FILENO, mbbuf, nbytes);
+	mbbuf[nbytes] = '\0';
+	std::cout << mbbuf;
 }
 
 enum class Prefix {
@@ -266,7 +266,7 @@ int main() {
 				c += 32;
 		}
 
-		if(input == "Q")
+		if(input == "q")
 			return 0;
 
 		std::string answer;
