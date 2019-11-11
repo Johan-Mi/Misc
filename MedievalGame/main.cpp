@@ -16,12 +16,20 @@ int* map;
 int mapWidth;
 int mapHeight;
 
-void renderMap(const sf::RenderWindow&);
+void renderMap(sf::RenderWindow&);
+void loadAllMaps();
+
+sf::Texture tileAtlas;
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Medieval Game", sf::Style::Fullscreen);
+	tileAtlas.loadFromFile("Graphics/tileAtlas.png");
+	sf::VideoMode screenRes = sf::VideoMode::getDesktopMode();
+	sf::RenderWindow window(screenRes, "Medieval Game", sf::Style::Fullscreen);
+	window.setView(sf::View(sf::FloatRect(0, 0, screenWidth, screenHeight)));
 
-    while (window.isOpen()) {
+	loadAllMaps();
+
+	while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
@@ -40,7 +48,7 @@ int main() {
     return 0;
 }
 
-void renderMap(const sf::RenderWindow& window) {
+void renderMap(sf::RenderWindow& window) {
 	for(int i = 0; i < (screenHeight + 15) / 16 + 1; i++) {
 		for(int j = 0; j < (screenWidth + 15) / 16 + 1; j++) {
 			sf::VertexArray quad(sf::Quads, 4);
@@ -48,7 +56,15 @@ void renderMap(const sf::RenderWindow& window) {
 			quad[1].position = quad[0].position + sf::Vector2f(16, 0);
 			quad[2].position = quad[0].position + sf::Vector2f(16, 16);
 			quad[3].position = quad[0].position + sf::Vector2f(0, 16);
-			window.draw(quad);
+			quad[0].texCoords = sf::Vector2f(0, 0);
+			quad[1].texCoords = quad[0].texCoords + sf::Vector2f(16, 0);
+			quad[2].texCoords = quad[0].texCoords + sf::Vector2f(16, 16);
+			quad[3].texCoords = quad[0].texCoords + sf::Vector2f(0, 16);
+			window.draw(quad, &tileAtlas);
 		}
 	}
+}
+
+void loadAllMaps() {
+	std::if mapNames();
 }
