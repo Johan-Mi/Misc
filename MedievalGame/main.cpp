@@ -4,8 +4,10 @@
 #include <fstream>
 #include <unordered_map>
 
-constexpr int screenWidth = 256;
+constexpr int screenWidth = 320;
 constexpr int screenHeight = 240;
+constexpr float moveSpeed = 2.0f;
+constexpr int maxFramerate = 60;
 
 struct Tile {
 	const sf::Vector2f atlasPos;
@@ -26,7 +28,7 @@ struct Map {
 	}
 
 	unsigned& operator()(int x, int y) {
-		return data[x * width + y];
+		return data[y * width + x];
 	}
 
 	~Map() {
@@ -38,51 +40,68 @@ std::unordered_map<std::string, Map> maps;
 
 Map* map;
 
+sf::Texture tileAtlas;
+
+struct Camera {
+	int x = 0;
+	int y = 0;
+	float xSub = 0;
+	float ySub = 0;
+} cam;
+
 void renderMap(sf::RenderWindow&);
 void loadAllMaps();
 void setMap(const std::string&);
+void limitCameraPos();
+void inputs();
 
-sf::Texture tileAtlas;
+
 
 int main() {
-	tileAtlas.loadFromFile("Graphics/tileAtlas.png");
 	sf::VideoMode screenRes = sf::VideoMode::getDesktopMode();
 	sf::RenderWindow window(screenRes, "Medieval Game", sf::Style::Fullscreen);
 	window.setView(sf::View(sf::FloatRect(0, 0, screenWidth, screenHeight)));
+	window.setFramerateLimit(maxFramerate);
+	window.setVerticalSyncEnabled(true);
+
+	tileAtlas.loadFromFile("Graphics/tileAtlas.png");
 
 	loadAllMaps();
-
 	setMap("map1");
 
 	while (window.isOpen()) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
+		sf::Event event;
+		while (window.pollEvent(event)) {
+		if (event.type == sf::Event::Closed)
+			window.close();
 			else if(event.type == sf::Event::KeyPressed) {
 				if(event.key.code == sf::Keyboard::Escape)
 					window.close();
 			}
-        }
+		}
 
+		inputs();
+		limitCameraPos();
 		renderMap(window);
 
-        window.display();
-    }
+		window.display();
+	}
 
-    return 0;
+	return 0;
 }
 
+
+
 void renderMap(sf::RenderWindow& window) {
-	for(int i = 0; i < (screenHeight + 15) / 16 + 1; i++) {
-		for(int j = 0; j < (screenWidth + 15) / 16 + 1; j++) {
+	for(int i = 0; i < screenHeight / 16 + (cam.y != map->height - screenHeight / 16); i++) {
+		for(int j = 0; j < screenWidth / 16 + (cam.x != map->width - screenWidth / 16); j++) {
 			sf::VertexArray quad(sf::Quads, 4);
-			quad[0].position = sf::Vector2f(j * 16, i * 16);
+			quad[0].position = sf::Vector2f(j * 16 - cam.xSub, i * 16 - cam.ySub);
 			quad[1].position = quad[0].position + sf::Vector2f(16, 0);
 			quad[2].position = quad[0].position + sf::Vector2f(16, 16);
 			quad[3].position = quad[0].position + sf::Vector2f(0, 16);
 
-			quad[0].texCoords = tiles[(*map)(j, i)].atlasPos;
+			quad[0].texCoords = tiles[(*map)(j + cam.x, i + cam.y)].atlasPos;
 			quad[1].texCoords = quad[0].texCoords + sf::Vector2f(16, 0);
 			quad[2].texCoords = quad[0].texCoords + sf::Vector2f(16, 16);
 			quad[3].texCoords = quad[0].texCoords + sf::Vector2f(0, 16);
@@ -108,6 +127,55 @@ void loadAllMaps() {
 	}
 	mapNames.close();
 }
+
 void setMap(const std::string& name) {
 	map = &maps[name];
+}
+
+void limitCameraPos() {
+	if(cam.x < 0) {
+		cam.x = 0;
+		cam.xSub = 0.0f;
+	} else if(cam.x >= map->width - screenWidth / 16) {
+		cam.x = map->width - screenWidth / 16;
+		cam.xSub = 0.0f;
+	}
+	if(cam.y < 0) {
+		cam.y = 0;
+		cam.ySub = 0.0f;
+	} else if(cam.y >= map->height - screenHeight / 16) {
+		cam.y = map->height - screenHeight / 16;
+		cam.ySub = 0.0f;
+	}
+}
+
+void inputs() {
+	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+		cam.xSub -= moveSpeed;
+		if(cam.xSub < 0.0f) {
+			cam.xSub += 16.0f;
+			cam.x--;
+		}
+	}
+	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+		cam.xSub += moveSpeed;
+		if(cam.xSub > 16.0f) {
+			cam.xSub -= 16.0f;
+			cam.x++;
+		}
+	}
+	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+		cam.ySub -= moveSpeed;
+		if(cam.ySub < 0.0f) {
+			cam.ySub += 16.0f;
+			cam.y--;
+		}
+	}
+	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+		cam.ySub += moveSpeed;
+		if(cam.ySub > 16.0f) {
+			cam.ySub -= 16.0f;
+			cam.y++;
+		}
+	}
 }
