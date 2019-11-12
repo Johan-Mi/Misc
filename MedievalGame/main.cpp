@@ -40,6 +40,7 @@ Map* map;
 
 void renderMap(sf::RenderWindow&);
 void loadAllMaps();
+void setMap(const std::string&);
 
 sf::Texture tileAtlas;
 
@@ -51,7 +52,7 @@ int main() {
 
 	loadAllMaps();
 
-	map = &maps["map1"];
+	setMap("map1");
 
 	while (window.isOpen()) {
         sf::Event event;
@@ -97,12 +98,16 @@ void loadAllMaps() {
 		std::ifstream currentMap("Maps/" + currentName, std::ios::in | std::ios::binary);
 		std::vector<unsigned char> contents((std::istreambuf_iterator<char>(currentMap)), std::istreambuf_iterator<char>());
 		currentMap.close();
-		maps[currentName].width = *(unsigned*)&contents[0];
-		maps[currentName].height = *(unsigned*)&contents[4];
-		maps[currentName].allocate();
-		for(int i = 0; i < maps[currentName].width * maps[currentName].height; i++)
-			maps[currentName].data[i] = *(unsigned*)&contents[4 * i + 8];
-		std::clog << "Loaded map: " << currentName << "\nWidth: " << maps[currentName].width << "\nHeight: " << maps[currentName].height << '\n';
+		map = &maps[currentName];
+		map->width = *(unsigned*)&contents[0];
+		map->height = *(unsigned*)&contents[4];
+		map->allocate();
+		for(int i = 0; i < map->width * map->height; i++)
+			map->data[i] = *(unsigned*)&contents[4 * i + 8];
+		std::clog << "Loaded map: " << currentName << "\nWidth: " << map->width << "\nHeight: " << map->height << '\n';
 	}
 	mapNames.close();
+}
+void setMap(const std::string& name) {
+	map = &maps[name];
 }
