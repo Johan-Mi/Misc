@@ -54,8 +54,8 @@ enum class Direction {
 };
 
 struct Player {
-	int x = 1;
-	int y = 1;
+	int x = 3;
+	int y = 3;
 	float xSub = 0;
 	float ySub = 0;
 	Direction dir = Direction::Down;
@@ -201,7 +201,7 @@ void inputs() {
 
 void renderPlayer(sf::RenderWindow& window) {
 	sf::VertexArray playerSprite(sf::Quads, 4);
-	playerSprite[0].position = sf::Vector2f(player.x + player.xSub - cam.x - cam.xSub, player.y + player.ySub - cam.y - cam.ySub - 16);
+	playerSprite[0].position = sf::Vector2f((player.x - cam.x) * 16 + player.xSub - cam.xSub, (player.y - cam.y - 1) * 16 + player.ySub - cam.ySub);
 	playerSprite[1].position = playerSprite[0].position + sf::Vector2f(16, 0);
 	playerSprite[2].position = playerSprite[0].position + sf::Vector2f(16, 16);
 	playerSprite[3].position = playerSprite[0].position + sf::Vector2f(0, 16);
