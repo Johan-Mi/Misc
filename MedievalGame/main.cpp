@@ -6,16 +6,15 @@
 
 constexpr int screenWidth = 320;
 constexpr int screenHeight = 240;
-constexpr float moveSpeed = 2.0f;
+constexpr float moveSpeed = 0.8f;
 constexpr int maxFramerate = 60;
+
+enum class Direction {
+	Left, Right, Up, Down
+};
 
 struct Tile {
 	const sf::Vector2f atlasPos;
-};
-
-const Tile tiles[] {
-	{{0, 0}},
-	{{16, 0}},
 };
 
 struct Map {
@@ -36,12 +35,6 @@ struct Map {
 	}
 };
 
-std::unordered_map<std::string, Map> maps;
-
-Map* map;
-
-sf::Texture tileAtlas;
-
 struct Camera {
 	int x = 0;
 	int y = 0;
@@ -49,18 +42,23 @@ struct Camera {
 	float ySub = 0;
 } cam;
 
-enum class Direction {
-	Left, Right, Up, Down
-};
-
 struct Player {
 	int x = 3;
 	int y = 3;
 	float xSub = 0;
 	float ySub = 0;
 	Direction dir = Direction::Down;
+	int actionDuration = 0;
 } player;
 
+const Tile tiles[] {
+	{{0, 0}},
+	{{16, 0}},
+};
+
+std::unordered_map<std::string, Map> maps;
+Map* map;
+sf::Texture tileAtlas;
 sf::Texture playerTexture;
 
 
@@ -71,6 +69,7 @@ void setMap(const std::string&);
 void limitCameraPos();
 void inputs();
 void renderPlayer(sf::RenderWindow&);
+void moveCameraToPlayer();
 
 
 
@@ -99,6 +98,7 @@ int main() {
 		}
 
 		inputs();
+		moveCameraToPlayer();
 		limitCameraPos();
 		renderMap(window);
 		renderPlayer(window);
@@ -168,33 +168,93 @@ void limitCameraPos() {
 	}
 }
 
+/*
 void inputs() {
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-		cam.xSub -= moveSpeed;
-		if(cam.xSub < 0.0f) {
-			cam.xSub += 16.0f;
-			cam.x--;
+		player.xSub -= moveSpeed;
+		if(player.xSub < 0.0f) {
+			player.xSub += 16.0f;
+			player.x--;
 		}
 	}
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-		cam.xSub += moveSpeed;
-		if(cam.xSub > 16.0f) {
-			cam.xSub -= 16.0f;
-			cam.x++;
+		player.xSub += moveSpeed;
+		if(player.xSub > 16.0f) {
+			player.xSub -= 16.0f;
+			player.x++;
 		}
 	}
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-		cam.ySub -= moveSpeed;
-		if(cam.ySub < 0.0f) {
-			cam.ySub += 16.0f;
-			cam.y--;
+		player.ySub -= moveSpeed;
+		if(player.ySub < 0.0f) {
+			player.ySub += 16.0f;
+			player.y--;
 		}
 	}
 	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-		cam.ySub += moveSpeed;
-		if(cam.ySub > 16.0f) {
-			cam.ySub -= 16.0f;
-			cam.y++;
+		player.ySub += moveSpeed;
+		if(player.ySub > 16.0f) {
+			player.ySub -= 16.0f;
+			player.y++;
+		}
+	}
+}
+*/
+
+void inputs() {
+	if(player.actionDuration) {
+		player.actionDuration--;
+		switch(player.dir) {
+		case Direction::Up:
+			player.ySub -= moveSpeed;
+			if(player.ySub < 0.0f) {
+				player.ySub += 16.0f;
+				player.y--;
+			}
+		break;
+		case Direction::Down:
+			player.ySub += moveSpeed;
+			if(player.ySub > 16.0f) {
+				player.ySub -= 16.0f;
+				player.y++;
+			}
+		break;
+		case Direction::Left:
+			player.xSub -= moveSpeed;
+			if(player.xSub < 0.0f) {
+				player.xSub += 16.0f;
+				player.x--;
+			}
+		break;
+		case Direction::Right:
+			player.xSub += moveSpeed;
+			if(player.xSub > 16.0f) {
+				player.xSub -= 16.0f;
+				player.x++;
+			}
+		break;
+		}
+	} else {
+		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+				player.dir = Direction::Up;
+				player.actionDuration = 20;
+			}
+		} else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+				player.dir = Direction::Down;
+				player.actionDuration = 20;
+			}
+		} else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+				player.dir = Direction::Left;
+				player.actionDuration = 20;
+			}
+		} else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+				player.dir = Direction::Right;
+				player.actionDuration = 20;
+			}
 		}
 	}
 }
@@ -203,11 +263,18 @@ void renderPlayer(sf::RenderWindow& window) {
 	sf::VertexArray playerSprite(sf::Quads, 4);
 	playerSprite[0].position = sf::Vector2f((player.x - cam.x) * 16 + player.xSub - cam.xSub, (player.y - cam.y - 1) * 16 + player.ySub - cam.ySub);
 	playerSprite[1].position = playerSprite[0].position + sf::Vector2f(16, 0);
-	playerSprite[2].position = playerSprite[0].position + sf::Vector2f(16, 16);
-	playerSprite[3].position = playerSprite[0].position + sf::Vector2f(0, 16);
+	playerSprite[2].position = playerSprite[0].position + sf::Vector2f(16, 32);
+	playerSprite[3].position = playerSprite[0].position + sf::Vector2f(0, 32);
 	playerSprite[0].texCoords = sf::Vector2f(0, 0);
 	playerSprite[1].texCoords = sf::Vector2f(16, 0);
 	playerSprite[2].texCoords = sf::Vector2f(16, 32);
 	playerSprite[3].texCoords = sf::Vector2f(0, 32);
 	window.draw(playerSprite, &playerTexture);
+}
+
+void moveCameraToPlayer() {
+	cam.x = player.x - screenWidth / 32;
+	cam.y = player.y - screenHeight / 32;
+	cam.xSub = player.xSub;
+	cam.ySub = player.ySub;
 }
