@@ -49,11 +49,30 @@ struct Camera {
 	float ySub = 0;
 } cam;
 
+enum class Direction {
+	Left, Right, Up, Down
+};
+
+struct Player {
+	int x = 0;
+	int y = 0;
+	float xSub = 0;
+	float ySub = 0;
+	Direction dir = Direction::Down;
+};
+
+Player* player;
+
+sf::Texture playerTexture;
+
+
+
 void renderMap(sf::RenderWindow&);
 void loadAllMaps();
 void setMap(const std::string&);
 void limitCameraPos();
 void inputs();
+void renderPlayer();
 
 
 
@@ -65,9 +84,12 @@ int main() {
 	window.setVerticalSyncEnabled(true);
 
 	tileAtlas.loadFromFile("Graphics/tileAtlas.png");
+	tileAtlas.loadFromFile("Graphics/Sprites/player.png");
 
 	loadAllMaps();
 	setMap("map1");
+
+	player = &Player();
 
 	while (window.isOpen()) {
 		sf::Event event;
@@ -83,6 +105,7 @@ int main() {
 		inputs();
 		limitCameraPos();
 		renderMap(window);
+		renderPlayer();
 
 		window.display();
 	}
@@ -178,4 +201,17 @@ void inputs() {
 			cam.y++;
 		}
 	}
+}
+
+void renderPlayer() {
+	sf::VertexArray(sf::Quads, 4) playerSprite;
+	playerSprite[0].position = sf::Vector2f(player->x + player->xSub - cam.x - cam.xSub, player->y + player->ySub - cam.y - cam.ySub - 16);
+	playerSprite[1].position = playerSprite[0].position + sf::Vector2f(16, 0);
+	playerSprite[2].position = playerSprite[0].position + sf::Vector2f(16, 16);
+	playerSprite[3].position = playerSprite[0].position + sf::Vector2f(0, 16);
+	playerSprite[0].texCoords = sf::Vector2f(0, 0);
+	playerSprite[1].texCoords = sf::Vector2f(16, 0);
+	playerSprite[2].texCoords = sf::Vector2f(16, 32);
+	playerSprite[3].texCoords = sf::Vector2f(0, 32);
+	window.draw(playerSprite, &playerTexture);
 }
