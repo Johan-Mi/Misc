@@ -3,18 +3,25 @@
 #include <string>
 #include <fstream>
 #include <unordered_map>
+#include <cstdint>
 
 constexpr int screenWidth = 320;
 constexpr int screenHeight = 240;
 constexpr float moveSpeed = 0.8f;
+constexpr int walkTime = 16 / moveSpeed;
 constexpr int maxFramerate = 60;
 
-enum class Direction {
+enum class Direction : uint8_t {
 	Left, Right, Up, Down
+};
+
+enum class TileType : uint8_t {
+	Normal, Wall
 };
 
 struct Tile {
 	const sf::Vector2f atlasPos;
+	const TileType type;
 };
 
 struct Map {
@@ -52,8 +59,8 @@ struct Player {
 } player;
 
 const Tile tiles[] {
-	{{0, 0}},
-	{{16, 0}},
+	{{0, 0}, TileType::Normal},
+	{{16, 0}, TileType::Wall},
 };
 
 std::unordered_map<std::string, Map> maps;
@@ -70,6 +77,7 @@ void limitCameraPos();
 void inputs();
 void renderPlayer(sf::RenderWindow&);
 void moveCameraToPlayer();
+void detectCollision(const Tile&);
 
 
 
@@ -168,38 +176,16 @@ void limitCameraPos() {
 	}
 }
 
-/*
-void inputs() {
-	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-		player.xSub -= moveSpeed;
-		if(player.xSub < 0.0f) {
-			player.xSub += 16.0f;
-			player.x--;
-		}
-	}
-	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-		player.xSub += moveSpeed;
-		if(player.xSub > 16.0f) {
-			player.xSub -= 16.0f;
-			player.x++;
-		}
-	}
-	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-		player.ySub -= moveSpeed;
-		if(player.ySub < 0.0f) {
-			player.ySub += 16.0f;
-			player.y--;
-		}
-	}
-	if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-		player.ySub += moveSpeed;
-		if(player.ySub > 16.0f) {
-			player.ySub -= 16.0f;
-			player.y++;
-		}
+void detectCollision(const Tile& tile) {
+	switch(tile.type) {
+	case TileType::Normal:
+		player.actionDuration = walkTime;
+		break;
+	case TileType::Wall:
+
+		break;
 	}
 }
-*/
 
 void inputs() {
 	if(player.actionDuration) {
@@ -238,7 +224,7 @@ void inputs() {
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
 			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
 				player.dir = Direction::Up;
-				player.actionDuration = 20;
+				detectCollision(tiles[(*map)(player.x, player.y - 1)]);
 			}
 		} else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
 			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
