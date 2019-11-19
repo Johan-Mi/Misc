@@ -79,7 +79,7 @@ void limitCameraPos();
 void inputs();
 void renderPlayer(sf::RenderWindow&);
 void moveCameraToPlayer();
-void detectCollision(const Tile&);
+void detectCollision(unsigned x, unsigned y);
 
 
 
@@ -178,8 +178,8 @@ void limitCameraPos() {
 	}
 }
 
-void detectCollision(const Tile& tile) {
-	switch(tile.type) {
+void detectCollision(unsigned x, unsigned y) {
+	switch(tiles[map->at(x, y)].type) {
 	case TileType::Normal:
 		player.actionDuration = walkTime;
 		break;
@@ -225,22 +225,22 @@ void inputs() {
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
 			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
 				player.dir = Direction::Up;
-				detectCollision(tiles[map->at(player.x, player.y - 1)]);
+				detectCollision(player.x, player.y - 1);
 			}
 		} else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
 			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
 				player.dir = Direction::Down;
-				detectCollision(tiles[map->at(player.x, player.y + 1)]);
+				detectCollision(player.x, player.y + 1);
 			}
 		} else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
 			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
 				player.dir = Direction::Left;
-				detectCollision(tiles[map->at(player.x - 1, player.y)]);
+				detectCollision(player.x - 1, player.y);
 			}
 		} else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
 			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
 				player.dir = Direction::Right;
-				detectCollision(tiles[map->at(player.x + 1, player.y - 1)]);
+				detectCollision(player.x + 1, player.y);
 			}
 		}
 	}
