@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <cstdint>
 
-constexpr int screenWidth = 320;
+constexpr int screenWidth = 336;
 constexpr int screenHeight = 240;
 constexpr float moveSpeed = 0.8f;
 constexpr int walkTime = 16 / moveSpeed;
@@ -33,7 +33,7 @@ struct Map {
 		data = new unsigned[width * height];
 	}
 
-	unsigned& operator()(int x, int y) {
+	unsigned& at(int x, int y) const {
 		return data[y * width + x];
 	}
 
@@ -59,8 +59,8 @@ struct Player {
 } player;
 
 const Tile tiles[] {
-	{{0, 0}, TileType::Normal},
-	{{16, 0}, TileType::Wall},
+	{{16, 0}, TileType::Normal},
+	{{0, 0}, TileType::Wall},
 };
 
 std::unordered_map<std::string, Map> maps;
@@ -128,7 +128,7 @@ void renderMap(sf::RenderWindow& window) {
 			quad[2].position = quad[0].position + sf::Vector2f(16, 16);
 			quad[3].position = quad[0].position + sf::Vector2f(0, 16);
 
-			quad[0].texCoords = tiles[(*map)(j + cam.x, i + cam.y)].atlasPos;
+			quad[0].texCoords = tiles[map->at(j + cam.x, i + cam.y)].atlasPos;
 			quad[1].texCoords = quad[0].texCoords + sf::Vector2f(16, 0);
 			quad[2].texCoords = quad[0].texCoords + sf::Vector2f(16, 16);
 			quad[3].texCoords = quad[0].texCoords + sf::Vector2f(0, 16);
@@ -181,8 +181,7 @@ void detectCollision(const Tile& tile) {
 	case TileType::Normal:
 		player.actionDuration = walkTime;
 		break;
-	case TileType::Wall:
-
+	default:
 		break;
 	}
 }
@@ -224,22 +223,22 @@ void inputs() {
 		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
 			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
 				player.dir = Direction::Up;
-				detectCollision(tiles[(*map)(player.x, player.y - 1)]);
+				detectCollision(tiles[map->at(player.x, player.y - 1)]);
 			}
 		} else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
 			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
 				player.dir = Direction::Down;
-				player.actionDuration = 20;
+				detectCollision(tiles[map->at(player.x, player.y + 1)]);
 			}
 		} else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
 			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
 				player.dir = Direction::Left;
-				player.actionDuration = 20;
+				detectCollision(tiles[map->at(player.x - 1, player.y)]);
 			}
 		} else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
 			if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
 				player.dir = Direction::Right;
-				player.actionDuration = 20;
+				detectCollision(tiles[map->at(player.x + 1, player.y - 1)]);
 			}
 		}
 	}
