@@ -3,4 +3,4 @@ main: main.o
 
 main.o: main.cpp
 	clear
-	g++ -c main.cpp -std=c++1z -fpermissive -O3
+	g++ -c main.cpp -std=c++1z -fpermissive -std=c++1z -O3

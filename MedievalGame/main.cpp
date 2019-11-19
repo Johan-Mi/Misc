@@ -33,7 +33,7 @@ struct Map {
 		data = new unsigned[width * height];
 	}
 
-	unsigned& at(int x, int y) const {
+	unsigned& at(unsigned x, unsigned y) const {
 		return data[y * width + x];
 	}
 
@@ -47,7 +47,7 @@ struct Camera {
 	int y = 0;
 	float xSub = 0;
 	float ySub = 0;
-} cam;
+};
 
 struct Player {
 	int x = 3;
@@ -56,7 +56,7 @@ struct Player {
 	float ySub = 0;
 	Direction dir = Direction::Down;
 	int actionDuration = 0;
-} player;
+};
 
 const Tile tiles[] {
 	{{16, 0}, TileType::Normal},
@@ -67,6 +67,8 @@ std::unordered_map<std::string, Map> maps;
 Map* map;
 sf::Texture tileAtlas;
 sf::Texture playerTexture;
+Camera cam;
+Player player;
 
 
 
