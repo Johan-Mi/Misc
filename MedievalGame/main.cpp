@@ -33,7 +33,10 @@ struct Map {
 		data = new unsigned[width * height];
 	}
 
-	unsigned& at(unsigned x, unsigned y) const {
+	unsigned& at(int x, int y) const {
+		if(x < 0 || y < 0) {
+			return data[0];
+		}
 		return data[y * width + x];
 	}
 
@@ -179,6 +182,7 @@ void limitCameraPos() {
 }
 
 void detectCollision(unsigned x, unsigned y) {
+	std::cout << player.x << ", " << player.y << '\n';
 	switch(tiles[map->at(x, y)].type) {
 	case TileType::Normal:
 		player.actionDuration = walkTime;
@@ -248,7 +252,7 @@ void inputs() {
 
 void renderPlayer(sf::RenderWindow& window) {
 	sf::VertexArray playerSprite(sf::Quads, 4);
-	playerSprite[0].position = sf::Vector2f((player.x - cam.x) * 16 + player.xSub - cam.xSub, (player.y - cam.y - 1) * 16 + player.ySub - cam.ySub);
+	playerSprite[0].position = sf::Vector2f((player.x - cam.x) * 16 + player.xSub - cam.xSub, (player.y - cam.y) * 16 + player.ySub - cam.ySub);
 	playerSprite[1].position = playerSprite[0].position + sf::Vector2f(16, 0);
 	playerSprite[2].position = playerSprite[0].position + sf::Vector2f(16, 32);
 	playerSprite[3].position = playerSprite[0].position + sf::Vector2f(0, 32);
