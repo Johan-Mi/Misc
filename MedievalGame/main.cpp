@@ -4,11 +4,12 @@
 #include <fstream>
 #include <unordered_map>
 #include <cstdint>
+#include <cmath>
 
 constexpr int screenWidth = 336;
 constexpr int screenHeight = 240;
-constexpr float moveSpeed = 0.8f;
-constexpr int walkTime = 16 / moveSpeed;
+constexpr float moveSpeed = 0.875f;
+constexpr int walkTime = std::ceil(16.0f / moveSpeed);
 constexpr int maxFramerate = 60;
 
 enum class Direction : uint8_t {
@@ -53,8 +54,8 @@ struct Camera {
 };
 
 struct Player {
-	int x = 3;
-	int y = 3;
+	int x = 0;
+	int y = 0;
 	float xSub = 0;
 	float ySub = 0;
 	Direction dir = Direction::Down;
@@ -82,7 +83,7 @@ void limitCameraPos();
 void inputs();
 void renderPlayer(sf::RenderWindow&);
 void moveCameraToPlayer();
-void detectCollision(unsigned x, unsigned y);
+void detectCollision(int x, int y);
 
 
 
@@ -115,6 +116,8 @@ int main() {
 		limitCameraPos();
 		renderMap(window);
 		renderPlayer(window);
+		//std::cout << player.x << ", " << player.y << '\n';
+		std::cout << player.y << ", " << player.ySub << '\n';
 
 		window.display();
 	}
@@ -181,8 +184,9 @@ void limitCameraPos() {
 	}
 }
 
-void detectCollision(unsigned x, unsigned y) {
-	std::cout << player.x << ", " << player.y << '\n';
+void detectCollision(int x, int y) {
+	if(x < 0 || y < 0)
+		return;
 	switch(tiles[map->at(x, y)].type) {
 	case TileType::Normal:
 		player.actionDuration = walkTime;
@@ -198,14 +202,14 @@ void inputs() {
 		switch(player.dir) {
 		case Direction::Up:
 			player.ySub -= moveSpeed;
-			if(player.ySub < 0.0f) {
+			if(player.ySub < 0.01f) {
 				player.ySub += 16.0f;
 				player.y--;
 			}
 		break;
 		case Direction::Down:
 			player.ySub += moveSpeed;
-			if(player.ySub > 16.0f) {
+			if(player.ySub > 15.9f) {
 				player.ySub -= 16.0f;
 				player.y++;
 			}
@@ -252,7 +256,7 @@ void inputs() {
 
 void renderPlayer(sf::RenderWindow& window) {
 	sf::VertexArray playerSprite(sf::Quads, 4);
-	playerSprite[0].position = sf::Vector2f((player.x - cam.x) * 16 + player.xSub - cam.xSub, (player.y - cam.y) * 16 + player.ySub - cam.ySub);
+	playerSprite[0].position = sf::Vector2f((player.x - cam.x) * 16 + player.xSub - cam.xSub, (player.y - cam.y - 1) * 16 + player.ySub - cam.ySub);
 	playerSprite[1].position = playerSprite[0].position + sf::Vector2f(16, 0);
 	playerSprite[2].position = playerSprite[0].position + sf::Vector2f(16, 32);
 	playerSprite[3].position = playerSprite[0].position + sf::Vector2f(0, 32);
