@@ -27,12 +27,23 @@ class Mos6502 {
 	u16 PC;
 	u8 S;
 
+	struct MemLocation {
+		u16 address;
+		operator u16&() {
+			return address;
+		}
+	};
 
+	u8 read(u8 location) { return location; }
+	u8 read(MemLocation location) { return readByte(location); }
+	void write(u8& location, u8 value) { location = value; }
+	void write(MemLocation location, u8 value) { writeByte(location, value); }
 
-	void movGeneric(const u8 src, u8& dest) {
-		dest = src;
-		flags.Z = !dest;
-		flags.N = dest >> 7;
+	void movGeneric(auto src, auto dest) {
+		u8 temp = read(src);
+		flags.Z = !temp;
+		flags.N = temp >> 7;
+		write(dest, temp);
 	}
 	bool conditionalBranch(bool condition, i8 value) {
 		if(condition)
@@ -40,31 +51,33 @@ class Mos6502 {
 		return condition;
 	}
 
-	void ADC(const u8 value) {
+	void ADC(auto location) {
 		// TODO: Add support for decimal mode
-		u16 sum = A + value + flags.C;
+		u8 temp = read(location);
+		u16 sum = A + temp + flags.C;
 		flags.C = sum > 0xff;
-		flags.V = ~(A ^ value) & (A ^ sum) & 0x80;
+		flags.V = ~(A ^ temp) & (A ^ sum) & 0x80;
 		A = sum;
 		flags.Z = !A;
 		flags.N = A >> 7;
 	}
-	void AND(const u8 value) {
-		A &= value;
+	void AND(auto location) {
+		A &= read(location);
 		flags.Z = !A;
 		flags.N = A >> 7;
 	}
-	void ASL(u8& value) {
-		flags.C = value >> 7;
-		value >>= 1;
-		flags.Z = !value;
-		flags.N = value >> 7;
+	void ASL(auto location) {
+		u8 temp = read(location);
+		flags.C = temp >> 7;
+		flags.Z = !temp;
+		flags.N = temp >> 7;
+		write(location, temp << 1);
 	}
 	bool BCC(const i8 value) { return conditionalBranch(!flags.C, value); }
 	bool BCS(const i8 value) { return conditionalBranch( flags.C, value); }
 	bool BEQ(const i8 value) { return conditionalBranch( flags.Z, value); }
-	void BIT(const u8 value) {
-		u8 result = A & value;
+	void BIT(auto location) {
+		u8 result = A & read(location);
 		flags.Z = !result;
 		flags.N = result >> 7;
 		flags.V = result >> 6 & 1;
@@ -81,57 +94,63 @@ class Mos6502 {
 	void CLD() { flags.D = 0; }
 	void CLI() { flags.I = 0; }
 	void CLV() { flags.V = 0; }
-	void CMP(const u8 value) {
-		flags.Z = A == value;
-		flags.N = (A - value) >> 7;
-		flags.C = value > A;
+	void CMP(auto location) {
+		u8 temp = read(location);
+		flags.Z = A == temp;
+		flags.N = (A - temp) >> 7;
+		flags.C = temp > A;
 	}
-	void CPX(const u8 value) {
-		flags.Z = X == value;
-		flags.N = (X - value) >> 7;
-		flags.C = value > X;
+	void CPX(auto location) {
+		u8 temp = read(location);
+		flags.Z = X == temp;
+		flags.N = (X - temp) >> 7;
+		flags.C = temp > X;
 	}
-	void CPY(const u8 value) {
-		flags.Z = Y == value;
-		flags.N = (Y - value) >> 7;
-		flags.C = value > Y;
+	void CPY(auto location) {
+		u8 temp = read(location);
+		flags.Z = Y == temp;
+		flags.N = (Y - temp) >> 7;
+		flags.C = temp > Y;
 	}
-	void DEC(u8& value) {
-		value--;
-		flags.Z = !value;
-		flags.N = value >> 7;
+	void DEC(auto location) {
+		u8 temp = read(location) - 1;
+		flags.Z = !temp;
+		flags.N = temp >> 7;
+		write(location, temp);
 	}
 	void DEX() { DEC(X); }
 	void DEY() { DEC(Y); }
-	void EOR(const u8 value) {
-		A ^= value;
+	void EOR(auto location) {
+		A ^= read(location);
 		flags.Z = !A;
 		flags.N = A >> 7;
 	}
-	void INC(u8& value) {
-		value++;
-		flags.Z = !value;
-		flags.N = value >> 7;
+	void INC(auto location) {
+		u8 temp = read(location) + 1;
+		flags.Z = !temp;
+		flags.N = temp >> 7;
+		write(location, temp);
 	}
 	void INX() { INC(X); }
 	void INY() { INC(Y); }
-	void JMP(const u8 value) { PC = value; }
-	void JSR(const u8 value) {
+	void JMP(const u16 value) { PC = value; }
+	void JSR(const u16 value) {
 		pushWord(PC + 1);
 		PC = value;
 	}
-	void LDA(const u8 value) { movGeneric(value, A); }
-	void LDX(const u8 value) { movGeneric(value, X); }
-	void LDY(const u8 value) { movGeneric(value, Y); }
-	void LSR(u8& value) {
-		flags.C = value;
-		value >>= 1;
+	void LDA(auto location) { movGeneric(location, A); }
+	void LDX(auto location) { movGeneric(location, X); }
+	void LDY(auto location) { movGeneric(location, Y); }
+	void LSR(auto location) {
+		u8 temp = read(location);
+		flags.C = temp;
 		flags.N = 0;
-		flags.Z = !value;
+		flags.Z = !temp;
+		write(location, temp >> 1);
 	}
 	void NOP() { /* Does nothing */ }
-	void ORA(const u8 value) {
-		A |= value;
+	void ORA(auto location) {
+		A |= read(location);
 		flags.Z = !A;
 		flags.N = A >> 7;
 	}
@@ -139,32 +158,35 @@ class Mos6502 {
 	void PHP() { pushByte(flags.raw); }
 	void PLA() { A = popByte(); }
 	void PLP() { flags.raw = popByte(); }
-	void ROL(u8& value) {
-		bool temp = flags.C;
-		flags.C = value >> 7;
-		value = value << 1 | temp;
-		flags.N = value >> 7;
-		flags.Z = !value;
+	void ROL(auto location) {
+		u8 temp = read(location);
+		bool oldCarry = flags.C;
+		flags.C = temp >> 7;
+		flags.N = temp >> 7;
+		flags.Z = !(temp & 0x7f);
+		write(location, temp << 1 | oldCarry);
 	}
-	void ROR(u8& value) {
-		bool temp = flags.C;
-		flags.C = value;
-		value = value >> 1 | temp << 7;
-		flags.N = value >> 7;
-		flags.Z = !value;
+	void ROR(auto location) {
+		u8 temp = read(location);
+		bool oldCarry = flags.C;
+		flags.C = temp;
+		temp = temp >> 1 | oldCarry << 7;
+		flags.N = temp >> 7;
+		flags.Z = !temp;
+		write(location, temp);
 	}
 	void RTI() {
 		flags.raw = popByte();
 		PC = popWord();
 	}
 	void RTS() { PC = popWord() + 1; }
-	void SBC(const u8 value) { ADC(~value); }
+	void SBC(auto location) { ADC(~read(location)); }
 	void SEC() { flags.C = 1; }
 	void SED() { flags.D = 1; }
 	void SEI() { flags.I = 1; }
-	void STA(const u16 address) { writeByte(address, A); }
-	void STX(const u16 address) { writeByte(address, X); }
-	void STY(const u16 address) { writeByte(address, Y); }
+	void STA(auto location) { write(location, A); }
+	void STX(auto location) { write(location, X); }
+	void STY(auto location) { write(location, Y); }
 	void TAX() { movGeneric(A, X); }
 	void TAY() { movGeneric(A, Y); }
 	void TSX() { movGeneric(S, X); }
@@ -203,10 +225,17 @@ public:
 		pushByte(value);
 	}
 
-	const u8 operandImm() { return readByte(PC + 1); }
-	const u8 operandImmWord() { return readWord(PC + 1); }
-	const u8 operandZpg() { return readByte(readByte(PC + 1)); }
-	const u8 operandAbs() { return readByte(readWord(PC + 1)); }
+	MemLocation operandImm()		{ return {(u16)(PC + 1)}; }
+	MemLocation operandImmWord()	{ return {(u16)(PC + 1)}; }
+	MemLocation operandZpg()		{ return {readByte(PC + 1)}; }
+	MemLocation operandAbs()		{ return {readWord(PC + 1)}; }
+	MemLocation operandAbsX()		{ return {readWord(PC + 1) + X}; }
+	MemLocation operandAbsY()		{ return {readWord(PC + 1) + Y}; }
+	MemLocation operandXInd()		{ return {readWord((readByte(PC + 1) + X) & 0xff)}; }
+	MemLocation operandIndY()		{ return {readWord(readByte(PC + 1)) + Y}; }
+	MemLocation operandInd()		{ return {readWord(readWord(PC + 1))}; }
+	MemLocation operandZpgX()		{ return { (readByte(PC + 1) + X) & 0xff}; }
+	MemLocation operandZpgY()		{ return { (readByte(PC + 1) + Y) & 0xff}; }
 
 	void step() {
 		switch(readByte(PC)) {
@@ -215,12 +244,18 @@ public:
 			// TODO: Implement interrupts
 			assert(!"BRK hasn't been implemented yet");
 			break;
-		case 0x01:
+		case 0x01: // ORA X,ind
+			ORA(operandXInd());
+			PC += 3;
+			break;
 		case 0x05: // ORA zpg
 			ORA(operandZpg());
 			PC += 2;
 			break;
-		case 0x06:
+		case 0x06: // ASL zpg
+			ASL(operandZpg());
+			PC += 2;
+			break;
 		case 0x08: // PHP
 			PHP();
 			PC++;
@@ -229,27 +264,57 @@ public:
 			ORA(operandImm());
 			PC += 2;
 			break;
-		case 0x0a:
-		case 0x0d:
-		case 0x0e:
+		case 0x0a: // ASL A
+			ASL(A);
+			PC++;
+			break;
+		case 0x0d: // ORA abs
+			ORA(operandAbs());
+			PC += 3;
+			break;
+		case 0x0e: // ASL abs
+			ASL(operandAbs());
+			PC += 3;
+			break;
 		case 0x10: // BPL rel
-			BPL(operandImm());
+			BPL(readByte(PC + 1));
 			PC += 2;
 			break;
-		case 0x11:
-		case 0x15:
-		case 0x16:
+		case 0x11: // ORA ind,y
+			ORA(operandIndY());
+			PC += 2;
+			break;
+		case 0x15: // ORA zpg,X
+			ORA(operandZpgX());
+			PC += 2;
+			break;
+		case 0x16: // ASL zpg,X
+			ASL(operandZpgX());
+			PC += 2;
+			break;
 		case 0x18: // CLC
 			CLC();
 			PC++;
 			break;
-		case 0x19:
-		case 0x1d:
-		case 0x1e:
+		case 0x19: // ORA abs,Y
+			ORA(operandAbsY());
+			PC += 3;
+			break;
+		case 0x1d: // ORA abs,X
+			ORA(operandAbsX());
+			PC += 3;
+			break;
+		case 0x1e: // ASL abs,X
+			ASL(operandAbsX());
+			PC += 3;
+			break;
 		case 0x20: // JSR abs
 			JSR(operandImmWord());
 			break;
-		case 0x21:
+		case 0x21: // AND X,ind
+			AND(operandXInd());
+			PC += 2;
+			break;
 		case 0x24: // BIT zpg
 			BIT(operandZpg());
 			PC += 2;
@@ -258,7 +323,10 @@ public:
 			AND(operandZpg());
 			PC += 2;
 			break;
-		case 0x26:
+		case 0x26: // ROL zpg
+			ROL(operandZpg());
+			PC += 2;
+			break;
 		case 0x28: // PLP
 			PLP();
 			PC++;
@@ -267,15 +335,24 @@ public:
 			AND(operandImm());
 			PC += 2;
 			break;
-		case 0x2a:
+		case 0x2a: // ROL A
+			ROL(A);
+			PC++;
+			break;
 		case 0x2c: // BIT abs
 			BIT(operandAbs());
 			PC += 3;
 			break;
-		case 0x2d:
-		case 0x2e:
+		case 0x2d: // AND abs
+			AND(operandAbs());
+			PC += 3;
+			break;
+		case 0x2e: // ROL abs
+			ROL(operandAbs());
+			PC += 3;
+			break;
 		case 0x30: // BMI rel
-			BMI(operandImm());
+			BMI(readByte(PC + 1));
 			PC += 2;
 			break;
 		case 0x31:
@@ -315,7 +392,7 @@ public:
 		case 0x4d:
 		case 0x4e:
 		case 0x50: // BVC rel
-			BVC(operandImm());
+			BVC(readByte(PC + 1));
 			PC += 2;
 			break;
 		case 0x51:
@@ -352,7 +429,7 @@ public:
 		case 0x6d:
 		case 0x6e:
 		case 0x70: // BVS rel
-			BVS(operandImm());
+			BVS(readByte(PC + 1));
 			PC += 2;
 			break;
 		case 0x71:
@@ -382,7 +459,7 @@ public:
 		case 0x8d:
 		case 0x8e:
 		case 0x90: // BCC rel
-			BCC(operandImm());
+			BCC(readByte(PC + 1));
 			PC += 2;
 			break;
 		case 0x91:
@@ -440,7 +517,7 @@ public:
 		case 0xad:
 		case 0xae:
 		case 0xb0: // BCS rel
-			BCS(operandImm());
+			BCS(readByte(PC + 1));
 			PC += 2;
 			break;
 		case 0xb1:
@@ -492,7 +569,7 @@ public:
 		case 0xcd:
 		case 0xce:
 		case 0xd0: // BNE rel
-			BNE(operandImm());
+			BNE(readByte(PC + 1));
 			PC += 2;
 			break;
 		case 0xd1:
@@ -539,7 +616,7 @@ public:
 		case 0xed:
 		case 0xee:
 		case 0xf0: // BEQ rel
-			BEQ(operandImm());
+			BEQ(readByte(PC + 1));
 			PC += 2;
 			break;
 		case 0xf1:
@@ -549,10 +626,18 @@ public:
 			SED();
 			PC++;
 			break;
-		case 0xf9:
-		case 0xfc:
-		case 0xfd:
-		case 0xfe:
+		case 0xf9: // SBC abs,Y
+			SBC(operandAbsY());
+			PC += 3;
+			break;
+		case 0xfd: // SBC abs,X
+			SBC(operandAbsX());
+			PC += 3;
+			break;
+		case 0xfe: // INC abs,X
+			INC(operandAbsX());
+			PC += 3;
+			break;
 
 		default: // Invalid
 			invalidOpcode();
