@@ -22,7 +22,7 @@ int main() {
 	std::string program((std::istreambuf_iterator<char>(fileInput)), std::istreambuf_iterator<char>());
 	fileInput.close();
 
-	addLine("#include <iostream>");
+	addLine("#include <stdio.h>");
 	emptyLine();
 	addLine("int main() {");
 	indentation++;
@@ -33,10 +33,10 @@ int main() {
 	for(unsigned int progCounter = 0; progCounter < program.length() - 1; progCounter++) {
 		switch(program[progCounter]) {
 		case '.':
-			addLine("std::cout << memory[ptr];");
+			addLine("putchar(memory[ptr]);");
 			break;
 		case ',':
-			addLine("std::cin >> memory[ptr];");
+			addLine("memory[ptr] = getchar();");
 			break;
 		case '+':
 		case '-':
@@ -86,22 +86,17 @@ int main() {
 			}
 			break;
 		case '[':
-			if(program[progCounter + 1] == '-' && program[progCounter + 2] == ']') {
+			if((program[progCounter + 1] == '-' || program[progCounter + 1] == '+') && program[progCounter + 2] == ']') {
 				progCounter += 2;
 				addLine("memory[ptr] = 0;");
 			} else {
-				if(program[progCounter + 2] == ']' && !(program[progCounter + 1] == '[' || program[progCounter + 1] == ']'))
-					addLine("while(memory[ptr])");
-				else
-					addLine("while(memory[ptr]) {");
+				addLine("while(memory[ptr]) {");
 				indentation++;
 			}
 			break;
 		case ']':
 			indentation--;
-			if(program[progCounter - 2] != '[' || program[progCounter - 1] == '[' || program[progCounter - 1] == ']')
-				addLine("}");
-			emptyLine();
+			addLine("}");
 			break;
 		default:
 			break;
