@@ -1,7 +1,7 @@
 #include <string>
 #include <fstream>
 #include <streambuf>
-#include <iostream>
+#include <stdio.h>
 
 constexpr int memSize = 32768;
 
@@ -34,15 +34,11 @@ int main() {
 			progCounter++;
 			break;
 		case '.':
-			std::cout << memory[memPos];
+			putchar(memory[memPos]);
 			progCounter++;
 			break;
 		case ',':
-			{
-				char temp;
-				std::cin >> temp;
-				memory[memPos] = temp;
-			}
+			memory[memPos] = getchar();
 			progCounter++;
 			break;
 		case '[':
