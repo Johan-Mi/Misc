@@ -5,5 +5,5 @@ main.o: main.cpp
 	clear
 	g++ -c main.cpp -O3 -Wall
 
-output: output.cpp
-	g++ -o output output.cpp -O3
+output: output.c
+	gcc -o output output.c -O3

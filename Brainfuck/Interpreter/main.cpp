@@ -3,7 +3,7 @@
 #include <streambuf>
 #include <stdio.h>
 
-constexpr int memSize = 32768;
+constexpr int memSize = 65536;
 
 int main() {
 	std::ifstream fileInput("program.bf");
@@ -12,7 +12,7 @@ int main() {
 
 	unsigned char memory[memSize] = {0};
 	unsigned int progCounter = 0;
-	int memPos = 0;
+	short memPos = 0;
 
 	while(progCounter < program.length() - 1) {
 		switch(program[progCounter]) {
@@ -25,12 +25,11 @@ int main() {
 			progCounter++;
 			break;
 		case '>':
-			++memPos %= memSize;
+			memPos++;
 			progCounter++;
 			break;
 		case '<':
-			if(!memPos--)
-				memPos = memSize - 1;
+			memPos--;
 			progCounter++;
 			break;
 		case '.':
@@ -66,6 +65,9 @@ int main() {
 					progCounter--;
 				} while(bracketCount);
 			}
+			progCounter++;
+			break;
+		default:
 			progCounter++;
 			break;
 		}

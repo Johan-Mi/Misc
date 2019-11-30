@@ -108,7 +108,7 @@ int main() {
 	indentation--;
 	addLine("}");
 
-	std::ofstream outputFile("output.cpp");
+	std::ofstream outputFile("output.c");
 	outputFile << output;
 	outputFile.close();
 
