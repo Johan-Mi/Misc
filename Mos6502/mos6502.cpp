@@ -12,14 +12,14 @@ class Mos6502 {
 
 	union {
 		struct {
-			bool N : 1;
-			bool V : 1;
-			bool _ : 1;
-			bool B : 1;
-			bool D : 1;
-			bool I : 1;
-			bool Z : 1;
-			bool C : 1;
+			bool N : 1; // Negative/sign
+			bool V : 1; // Overflow
+			bool _ : 1; // Unused
+			bool B : 1; // ?
+			bool D : 1; // Decimal
+			bool I : 1; // Interrupt disable
+			bool Z : 1; // Zero
+			bool C : 1; // Carry
 		};
 		u8 raw;
 	} flags;
@@ -85,10 +85,9 @@ class Mos6502 {
 	bool BNE(const i8 value) { return conditionalBranch(!flags.Z, value); }
 	bool BPL(const i8 value) { return conditionalBranch(!flags.N, value); }
 	void BRK() {
-		bool oldB = flags.B;
-		flags.B = true;
-		sendIrq();
-		flags.B = oldB;
+		pushWord(PC);
+		pushByte(flags.raw);
+		PC = readWord(0xffff);
 	}
 	bool BVC(const i8 value) { return conditionalBranch(!flags.V, value); }
 	bool BVS(const i8 value) { return conditionalBranch( flags.V, value); }
@@ -213,7 +212,9 @@ public:
 
 	}
 	void sendIrq() {
-
+		pushWord(PC);
+		pushByte(flags.raw & 0b11101111);
+		PC = readWord(0xffff);
 	}
 
 	virtual u8 readByte(u16 addresss);
