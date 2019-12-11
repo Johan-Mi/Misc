@@ -7,6 +7,10 @@ enum class ExprType {
 	Lambda, Application, Variable
 };
 
+enum class TokenType {
+	Lbracket, Rbracket, Dot, Lambda, Variable
+};
+
 struct Lambda;
 struct Application;
 struct Variable;
@@ -49,36 +53,44 @@ struct Lambda {
 	Lambda(const Lambda& other) : arg(other.arg), body(other.body) {}
 };
 
-void replaceVariable(Expression&, std::string, Expression);
+void subsituteVar(Expression&, std::string, Expression);
 struct Application {
 	Lambda func;
 	Expression arg;
 
 	Expression eval() {
 		Expression ret(func.body);
-		replaceVariable(func.body, func.arg.name, arg);
+		subsituteVar(func.body, func.arg.name, arg);
 		return ret;
 	}
 };
 
-void replaceVariable(Lambda& target, std::string varName, Expression expr) {
-	replaceVariable(target.body, varName, expr);
+void subsituteVar(Lambda& target, std::string varName, Expression expr) {
+	subsituteVar(target.body, varName, expr);
 }
-void replaceVariable(Application& target, std::string varName, Expression expr) {
-	replaceVariable(target.func, varName, expr);
-	replaceVariable(target.arg, varName, expr);
+void subsituteVar(Application& target, std::string varName, Expression expr) {
+	subsituteVar(target.func, varName, expr);
+	subsituteVar(target.arg, varName, expr);
 }
-void replaceVariable(Expression& target, std::string varName, Expression expr) {
+void subsituteVar(Expression& target, std::string varName, Expression expr) {
 	switch(target.type) {
 	case ExprType::Lambda:
-		replaceVariable(*(target.lambdaPtr), varName, expr);
+		subsituteVar(*(target.lambdaPtr), varName, expr);
 		break;
 	case ExprType::Application:
-		replaceVariable(*(target.applicationPtr), varName, expr);
+		subsituteVar(*(target.applicationPtr), varName, expr);
 	default:
 		break;
 	}
 }
+
+struct Token {
+	TokenType type;
+	std::string string;
+
+	Token(TokenType type) : type(type) {}
+	Token(const std::string& string) : string(string) {}
+};
 
 
 
@@ -86,30 +98,35 @@ int main() {
 	std::string input;
 	std::getline(std::cin, input);
 
-	std::vector<std::string> tokens;
-
+	std::vector<Token> tokens;
 	std::string current;
+
+	auto pushCurrent = [&](){
+		if(current.length() != 0) {
+			if(current == "lambda")
+				tokens.push_back(TokenType::Lambda);
+			else
+				tokens.emplace_back(current);
+			current.clear();
+		}
+	};
+
 	for(unsigned i = 0; i < input.length(); i++) {
-		if(input[i] == '(' || input[i] == ')' || input[i] == '.') {
-			if(!current.empty()) {
-				tokens.push_back(current);
-				current.clear();
-			}
-			tokens.emplace_back(1, input[i]);
+		if(input[i] == '(') {
+			pushCurrent();
+			tokens.emplace_back(TokenType::Lbracket);
+		} else if(input[i] == ')') {
+			pushCurrent();
+			tokens.emplace_back(TokenType::Rbracket);
+		} else if(input[i] == '.') {
+			pushCurrent();
+			tokens.emplace_back(TokenType::Dot);
 		} else if(input[i] == ' ') {
-			if(!current.empty()) {
-				tokens.push_back(current);
-				current.clear();
-			}
+			pushCurrent();
 		} else {
 			current += input[i];
 		}
 	}
-	if(!current.empty())
-		tokens.push_back(current);
-
-	for(const auto& token : tokens)
-		std::cout << token << '\n';
 
 	return 0;
 }
