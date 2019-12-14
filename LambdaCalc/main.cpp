@@ -26,10 +26,8 @@ std::string toString(const Application&);
 std::string toString(const Expression&);
 
 struct Expression {
-	union {
-		std::unique_ptr<Lambda> lambdaPtr;
-		std::unique_ptr<Application> applicationPtr;
-	};
+	std::unique_ptr<Lambda> lambdaPtr;
+	std::unique_ptr<Application> applicationPtr;
 	std::string variable;
 	ExprType type;
 
@@ -47,7 +45,6 @@ struct Expression {
 				break;
 		}
 	}
-	~Expression() {}
 
 	Expression& operator=(const Expression& other) {
 		type = other.type;
@@ -120,7 +117,7 @@ void subsituteVar(Expression& target, std::string varName, Expression expr) {
 }
 
 std::string toString(const Lambda& lambda) {
-	return "λ " + lambda.arg + '.' + toString(lambda.body);
+	return "λ" + lambda.arg + '.' + toString(lambda.body);
 }
 
 std::string toString(const Application& application) {
@@ -141,6 +138,9 @@ struct Parser {
 	int pos = 0;
 
 	bool Parse(Expression* result) {
+		if(pos >= tokens.size())
+			return false;
+
 		int backup = pos;
 		Expression tempExpr1, tempExpr2;
 
@@ -163,9 +163,6 @@ struct Parser {
 				&& Parse(&tempExpr2)) {
 			std::clog << "Found lambda\n";
 			result->type = ExprType::Lambda;
-			/*result->lambdaPtr = std::make_unique<Lambda>();
-			result->lambdaPtr->arg = tempExpr1.variable;
-			result->lambdaPtr->body = tempExpr2;*/
 			result->lambdaPtr = std::make_unique<Lambda>(tempExpr1.variable, tempExpr2);
 			return true;
 		}
@@ -225,15 +222,15 @@ int main() {
 		switch(input[i]) {
 			case '(':
 				pushCurrent();
-				parser.tokens.push_back(TokenType::Lbracket);
+				parser.tokens.emplace_back(TokenType::Lbracket);
 				break;
 			case ')':
 				pushCurrent();
-				parser.tokens.push_back(TokenType::Rbracket);
+				parser.tokens.emplace_back(TokenType::Rbracket);
 				break;
 			case '.':
 				pushCurrent();
-				parser.tokens.push_back(TokenType::Dot);
+				parser.tokens.emplace_back(TokenType::Dot);
 				break;
 			case ' ':
 				pushCurrent();
