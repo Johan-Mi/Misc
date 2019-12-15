@@ -11,9 +11,9 @@ enum class TokenType {
 	Lbracket, Rbracket, Dot, Lambda, Variable
 };
 
+struct Expression;
 struct Lambda;
 struct Application;
-struct Expression;
 struct Token;
 struct Parser;
 
@@ -21,9 +21,13 @@ void subsituteVar(Expression&, std::string, Expression);
 void subsituteVar(Lambda&, std::string, Expression);
 void subsituteVar(Application&, std::string, Expression);
 
+Expression eval(const Expression&);
+Expression eval(const Lambda&);
+Expression eval(const Application&);
+
+std::string toString(const Expression&);
 std::string toString(const Lambda&);
 std::string toString(const Application&);
-std::string toString(const Expression&);
 
 struct Expression {
 	std::unique_ptr<Lambda> lambdaPtr;
@@ -76,26 +80,7 @@ struct Lambda {
 struct Application {
 	Lambda func;
 	Expression arg;
-
-	Expression eval() {
-		Expression ret(func.body);
-		subsituteVar(func.body, func.arg, arg);
-		return ret;
-	}
 };
-
-std::string toString(const Expression& expression) {
-	switch(expression.type) {
-		case ExprType::Lambda:
-			return toString(*(expression.lambdaPtr));
-		case ExprType::Application:
-			return toString(*(expression.applicationPtr));
-		case ExprType::Variable:
-			return expression.variable;
-		default:
-			return "";
-	}
-}
 
 void subsituteVar(Lambda& target, std::string varName, Expression expr) {
 	subsituteVar(target.body, varName, expr);
@@ -116,12 +101,52 @@ void subsituteVar(Expression& target, std::string varName, Expression expr) {
 	}
 }
 
+Expression eval(const Expression& expression) {
+	switch(expression.type) {
+		case ExprType::Lambda:
+			return eval(*(expression.lambdaPtr));
+		case ExprType::Application:
+			return eval(*(expression.applicationPtr));
+		case ExprType::Variable:
+			return expression;
+		default:
+			return Expression();
+	}
+}
+
+Expression eval(const Lambda& lambda) {
+	Expression ret;
+	ret.lambdaPtr = std::make_unique<Lambda>();
+	ret.lambdaPtr->arg = lambda.arg;
+	ret.lambdaPtr->body = eval(lambda.body);
+	return ret;
+}
+
+Expression eval(const Application& application) {
+	Expression ret(application.func.body);
+	subsituteVar(ret, application.func.arg, application.arg);
+	return ret;
+}
+
 std::string toString(const Lambda& lambda) {
 	return "λ" + lambda.arg + '.' + toString(lambda.body);
 }
 
 std::string toString(const Application& application) {
 	return '(' + toString(application.func) + ' ' + toString(application.arg) + ')';
+}
+
+std::string toString(const Expression& expression) {
+	switch(expression.type) {
+		case ExprType::Lambda:
+			return toString(*(expression.lambdaPtr));
+		case ExprType::Application:
+			return toString(*(expression.applicationPtr));
+		case ExprType::Variable:
+			return expression.variable;
+		default:
+			return "";
+	}
 }
 
 struct Token {
@@ -135,13 +160,13 @@ struct Token {
 
 struct Parser {
 	std::vector<Token> tokens;
-	int pos = 0;
+	unsigned pos = 0;
 
 	bool Parse(Expression* result) {
 		if(pos >= tokens.size())
 			return false;
 
-		int backup = pos;
+		unsigned backup = pos;
 		Expression tempExpr1, tempExpr2;
 
 		std::clog << "Checking for variable\n";
@@ -150,6 +175,17 @@ struct Parser {
 			result->type = ExprType::Variable;
 			result->variable = tokens[pos++].string;
 			std::clog << "Assigned variable to result\n";
+			return true;
+		}
+
+		pos = backup;
+
+		std::clog << "Checking for brackets\n";
+		if(tokens[pos++].type == TokenType::Lbracket
+				&& Parse(&tempExpr1)
+				&& tokens[pos++].type == TokenType::Rbracket) {
+			std::clog << "Found brackets\n";
+			*result = tempExpr1;
 			return true;
 		}
 
@@ -178,17 +214,6 @@ struct Parser {
 			result->applicationPtr = std::make_unique<Application>();
 			result->applicationPtr->func = *(tempExpr1.lambdaPtr);
 			result->applicationPtr->arg = tempExpr2;
-			return true;
-		}
-
-		pos = backup;
-
-		std::clog << "Checking for brackets\n";
-		if(tokens[pos++].type == TokenType::Lbracket
-				&& Parse(&tempExpr1)
-				&& tokens[pos++].type == TokenType::Rbracket) {
-			std::clog << "Found brackets\n";
-			*result = tempExpr1;
 			return true;
 		}
 
