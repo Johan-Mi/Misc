@@ -1,24 +1,23 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
 
-void printBoard(const unsigned char board[9][9]) {
+void printBoard(const char board[9][9]) {
 	for(int i = 0; i < 9; i++) {
 		for(int j = 0; j < 9; j++) {
 			putchar(board[i][j] ? board[i][j] + '0' : ' ');
 			if(j == 2 || j == 5)
-				putchar('|');
+				printf("│");
 		}
 		putchar('\n');
 		if(i == 2 || i == 5)
-			puts("---+---+---");
+			puts("───┼───┼───");
 	}
 	putchar('\n');
 }
 
-bool solve(const unsigned char board[9][9], int x, int y) {
+bool solve(const char board[9][9], int x, int y) {
 	while(board[y][x]) {
 		if(x == 8 && y == 8) {
 			printBoard(board);
@@ -29,12 +28,11 @@ bool solve(const unsigned char board[9][9], int x, int y) {
 		}
 	}
 
-	unsigned char newBoard[9][9];
+	char newBoard[9][9];
 	memcpy(newBoard, board, 81);
 
-	int nextX = x + 1;
-	int nextY = y + (nextX == 9);
-	nextX %= 9;
+	int nextX = (x + 1) % 9;
+	int nextY = y + (x == 8);
 
 	bool possible[9];
 	memset(possible, true, sizeof(possible));
@@ -100,11 +98,12 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	unsigned char board[9][9];
+	char board[9][9];
 
-	for(int i = 0; i < 9; i++)
-		for(int j = 0; j < 9; j++)
-			switch(buffer[i * 10 + j]) {
+	for(int i = 0; i < 9; i++) {
+		for(int j = 0; j < 9; j++) {
+			char currChar = buffer[i * 10 + j];
+			switch(currChar) {
 				case '0':
 				case ' ':
 				case '.':
@@ -113,14 +112,16 @@ int main(int argc, char* argv[]) {
 					board[i][j] = 0;
 					break;
 				default:
-					if(buffer[i * 10 + j] >= '0' && buffer[i * 10 + j] <= '9')
-						board[i][j] = buffer[i * 10 + j] - '0';
+					if(currChar > '0' && currChar <= '9')
+						board[i][j] = currChar - '0';
 					else {
 						puts("Invalid character in input file");
 						return 0;
 					}
 					break;
 			}
+		}
+	}
 
 	fclose(fp);
 	free(buffer);
