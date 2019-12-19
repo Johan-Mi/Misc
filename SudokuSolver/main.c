@@ -46,16 +46,16 @@ bool solve(const char board[9][9], int x, int y) {
 
 	for(int i = x - x % 3; i < x - x % 3 + 3; i++)
 		for(int j = y - y % 3; j < y - y % 3 + 3; j++)
-			if((i != x || j != y) && newBoard[j][i])
+			if(newBoard[j][i])
 				possible[newBoard[j][i] - 1] = false;
 
 	for(int i = 0; i < 9; i++) {
 		if(possible[i]) {
+			newBoard[y][x] = i + 1;
 			if(x == 8 && y == 8) {
 				printBoard(newBoard);
 				return true;
 			}
-			newBoard[y][x] = i + 1;
 			if(solve(newBoard, nextX, nextY))
 				return true;
 		}
@@ -67,31 +67,27 @@ bool solve(const char board[9][9], int x, int y) {
 int main(int argc, char* argv[]) {
 	if(argc != 2) {
 		printf("Usage: %s (name of sudoku file)\n", argv[0]);
-		return 0;
+		return 1;
 	}
 
-	FILE* fp;
-	long size;
-	char* buffer;
-
-	fp = fopen(argv[1], "rb");
+	FILE* fp = fopen(argv[1], "rb");
 	if(!fp) {
 		perror(argv[1]);
 		return 1;
 	}
 
 	fseek(fp, 0L, SEEK_END);
-	size = ftell(fp);
+	long size = ftell(fp);
 	rewind(fp);
 
-	buffer = (char*)calloc(1, size + 1);
+	char* buffer = (char*)calloc(1, size + 1);
 	if(!buffer) {
 		fclose(fp);
 		fputs("Memory allocation failed", stderr);
 		return 1;
 	}
 
-	if(1 != fread(buffer, size, 1, fp)) {
+	if(fread(buffer, size, 1, fp) != 1) {
 		fclose(fp);
 		free(buffer);
 		fputs("Read failed", stderr);
@@ -115,7 +111,7 @@ int main(int argc, char* argv[]) {
 					if(currChar > '0' && currChar <= '9')
 						board[i][j] = currChar - '0';
 					else {
-						puts("Invalid character in input file");
+						fputs("Invalid character in input file", stderr);
 						return 0;
 					}
 					break;
