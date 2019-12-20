@@ -83,14 +83,14 @@ int main(int argc, char* argv[]) {
 	char* buffer = (char*)calloc(1, size + 1);
 	if(!buffer) {
 		fclose(fp);
-		fputs("Memory allocation failed", stderr);
+		fputs("Memory allocation failed\n", stderr);
 		return 1;
 	}
 
 	if(fread(buffer, size, 1, fp) != 1) {
 		fclose(fp);
 		free(buffer);
-		fputs("Read failed", stderr);
+		fputs("Read failed\n", stderr);
 		return 1;
 	}
 
@@ -111,8 +111,8 @@ int main(int argc, char* argv[]) {
 					if(currChar > '0' && currChar <= '9')
 						board[i][j] = currChar - '0';
 					else {
-						fputs("Invalid character in input file", stderr);
-						return 0;
+						fputs("Invalid character in input file\n", stderr);
+						return 1;
 					}
 					break;
 			}
@@ -124,5 +124,6 @@ int main(int argc, char* argv[]) {
 
 	printBoard(board);
 
-	solve(board, 0, 0);
+	if(!solve(board, 0, 0))
+		puts("No solution found");
 }
