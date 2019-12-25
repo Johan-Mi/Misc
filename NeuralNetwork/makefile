@@ -1,3 +1,3 @@
 main: main.c
 	clear
-	gcc -o main main.c -std=c11 -O3 -Wall
+	gcc -o main main.c -std=c11 -O3 -Wall -lm -fsanitize=address
