@@ -54,7 +54,7 @@ Neuron makeNeuron(unsigned connectionCount) {
 }
 
 Layer makeLayer(unsigned size, unsigned prevSize) {
-	Layer ret = {size, MKARR(Layer, size)};
+	Layer ret = {size, MKARR(Neuron, size)};
 	for(unsigned i = 0; i < size; i++)
 		ret.neurons[i] = makeNeuron(prevSize);
 	return ret;
