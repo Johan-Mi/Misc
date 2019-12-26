@@ -1,20 +1,43 @@
-#include <string>
-#include <fstream>
-#include <streambuf>
+#include <stdlib.h>
 #include <stdio.h>
 
-constexpr int memSize = 65536;
+int main(int argc, char* argv[]) {
+	if(argc != 2) {
+		printf("Usage: %s (name of brainfuck program)\n", argv[0]);
+		return 1;
+	}
 
-int main() {
-	std::ifstream fileInput("program.bf");
-	std::string program((std::istreambuf_iterator<char>(fileInput)), std::istreambuf_iterator<char>());
-	fileInput.close();
+	FILE* fp = fopen(argv[1], "rb");
+	if(!fp) {
+		perror(argv[1]);
+		return 1;
+	}
 
-	unsigned char memory[memSize] = {0};
+	fseek(fp, 0L, SEEK_END);
+	long size = ftell(fp);
+	rewind(fp);
+
+	char* program = (char*)calloc(1, size + 1);
+	if(!program) {
+		fclose(fp);
+		fputs("Memory allocation failed\n", stderr);
+		return 1;
+	}
+
+	if(fread(program, size, 1, fp) != 1) {
+		fclose(fp);
+		free(program);
+		fputs("Read failed\n", stderr);
+		return 1;
+	}
+
+	fclose(fp);
+
+	unsigned char memory[65536] = {0};
 	unsigned int progCounter = 0;
-	short memPos = 0;
+	unsigned short memPos = 0;
 
-	while(progCounter < program.length() - 1) {
+	while(progCounter < size) {
 		switch(program[progCounter]) {
 		case '+':
 			memory[memPos]++;
@@ -73,5 +96,7 @@ int main() {
 		}
 	}
 
-	return 0;
+	free(program);
+
+	return EXIT_SUCCESS;
 }

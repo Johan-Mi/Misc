@@ -1,6 +1,2 @@
-main: main.o
-	g++ -o main main.o -O3
-
-main.o: main.cpp
-	clear
-	g++ -c main.cpp -O3 -Wall
+main: main.c
+	gcc -o main main.c -std=c11 -O3 -Wall
