@@ -5,7 +5,7 @@ int main(void) {
 	unsigned short ptr = 0;
 	unsigned char memory[65536] = {0};
 
-	memory[0] = 13;
+	memory[ptr] += 13;
 	while(memory[ptr]) {
 		memory[ptr]--;
 		ptr++;
@@ -38,7 +38,9 @@ int main(void) {
 	memory[ptr]++;
 	while(memory[ptr]) {
 		ptr += 8;
-		memory[ptr] = 0;
+		while(memory[ptr]) {
+			memory[ptr]--;
+		}
 		ptr++;
 	}
 	ptr -= 9;
@@ -46,7 +48,9 @@ int main(void) {
 		ptr -= 9;
 	}
 	ptr += 8;
-	memory[ptr] = 0;
+	while(memory[ptr]) {
+		memory[ptr]--;
+	}
 	memory[ptr]++;
 	ptr -= 7;
 	memory[ptr] += 5;
@@ -69,13 +73,17 @@ int main(void) {
 		ptr -= 9;
 	}
 	ptr += 3;
-	memory[ptr] = 0;
+	while(memory[ptr]) {
+		memory[ptr]--;
+	}
 	memory[ptr]++;
 	while(memory[ptr]) {
 		ptr += 6;
 		while(memory[ptr]) {
 			ptr += 7;
-			memory[ptr] = 0;
+			while(memory[ptr]) {
+				memory[ptr]--;
+			}
 			ptr += 2;
 		}
 		ptr -= 9;
@@ -83,7 +91,9 @@ int main(void) {
 			ptr -= 9;
 		}
 		ptr += 7;
-		memory[ptr] = 0;
+		while(memory[ptr]) {
+			memory[ptr]--;
+		}
 		memory[ptr]++;
 		ptr -= 6;
 		memory[ptr] += 4;
@@ -119,7 +129,9 @@ int main(void) {
 		}
 		ptr += 3;
 		while(memory[ptr]) {
-			memory[ptr] = 0;
+			while(memory[ptr]) {
+				memory[ptr]--;
+			}
 			ptr += 6;
 			while(memory[ptr]) {
 				ptr += 7;
@@ -196,23 +208,41 @@ int main(void) {
 				}
 				memory[ptr]++;
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr -= 9;
 				while(memory[ptr]) {
 					ptr -= 9;
@@ -302,7 +332,9 @@ int main(void) {
 			ptr -= 9;
 			while(memory[ptr]) {
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr--;
 				memory[ptr]--;
 				ptr += 4;
@@ -422,7 +454,9 @@ int main(void) {
 			ptr -= 9;
 			while(memory[ptr]) {
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr--;
 				memory[ptr]--;
 				ptr += 4;
@@ -529,7 +563,9 @@ int main(void) {
 							ptr -= 9;
 						}
 						ptr += 4;
-						memory[ptr] = 0;
+						while(memory[ptr]) {
+							memory[ptr]--;
+						}
 						memory[ptr]++;
 						ptr += 5;
 						while(memory[ptr]) {
@@ -571,14 +607,18 @@ int main(void) {
 							ptr -= 9;
 						}
 						ptr += 3;
-						memory[ptr] = 0;
+						while(memory[ptr]) {
+							memory[ptr]--;
+						}
 						memory[ptr]++;
 						ptr += 6;
 						while(memory[ptr]) {
 							ptr += 9;
 						}
 						ptr++;
-						memory[ptr] = 0;
+						while(memory[ptr]) {
+							memory[ptr]--;
+						}
 						memory[ptr]++;
 						ptr--;
 					}
@@ -623,7 +663,9 @@ int main(void) {
 				ptr += 4;
 				memory[ptr]++;
 				ptr -= 2;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr -= 2;
 			}
 			ptr += 2;
@@ -638,7 +680,9 @@ int main(void) {
 					ptr += 4;
 					memory[ptr]++;
 					ptr -= 2;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 				}
 				ptr++;
 				while(memory[ptr]) {
@@ -657,11 +701,17 @@ int main(void) {
 				ptr += 13;
 				while(memory[ptr]) {
 					ptr += 2;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr += 5;
 				}
 				ptr -= 9;
@@ -669,7 +719,9 @@ int main(void) {
 					ptr -= 9;
 				}
 				ptr += 3;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr += 6;
 				while(memory[ptr]) {
 					ptr += 5;
@@ -721,21 +773,37 @@ int main(void) {
 						memory[ptr]--;
 					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr -= 9;
 					while(memory[ptr]) {
 						ptr -= 9;
@@ -825,7 +893,9 @@ int main(void) {
 				ptr -= 9;
 				while(memory[ptr]) {
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr--;
 					memory[ptr]--;
 					ptr += 3;
@@ -1141,7 +1211,9 @@ int main(void) {
 					ptr -= 5;
 				}
 				ptr += 6;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr -= 6;
 				memory[ptr]++;
 				ptr += 4;
@@ -1189,7 +1261,9 @@ int main(void) {
 									ptr -= 9;
 								}
 								ptr += 3;
-								memory[ptr] = 0;
+								while(memory[ptr]) {
+									memory[ptr]--;
+								}
 								memory[ptr]++;
 								ptr += 6;
 								while(memory[ptr]) {
@@ -1231,14 +1305,18 @@ int main(void) {
 									ptr -= 9;
 								}
 								ptr += 4;
-								memory[ptr] = 0;
+								while(memory[ptr]) {
+									memory[ptr]--;
+								}
 								memory[ptr]++;
 								ptr += 5;
 								while(memory[ptr]) {
 									ptr += 9;
 								}
 								ptr++;
-								memory[ptr] = 0;
+								while(memory[ptr]) {
+									memory[ptr]--;
+								}
 								memory[ptr]++;
 								ptr--;
 							}
@@ -1353,7 +1431,9 @@ int main(void) {
 							ptr -= 12;
 						}
 						ptr += 4;
-						memory[ptr] = 0;
+						while(memory[ptr]) {
+							memory[ptr]--;
+						}
 						ptr -= 4;
 					}
 					ptr += 3;
@@ -1531,17 +1611,27 @@ int main(void) {
 					}
 				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr += 2;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr += 5;
 				while(memory[ptr]) {
 					ptr += 2;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr += 6;
 				}
 				ptr -= 9;
@@ -1580,23 +1670,41 @@ int main(void) {
 					}
 					memory[ptr]++;
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr -= 9;
 					while(memory[ptr]) {
 						ptr -= 9;
@@ -1686,7 +1794,9 @@ int main(void) {
 				ptr -= 9;
 				while(memory[ptr]) {
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr--;
 					memory[ptr]--;
 					ptr += 3;
@@ -1740,7 +1850,9 @@ int main(void) {
 					ptr -= 9;
 				}
 				ptr += 5;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr += 4;
 				memory[ptr] += 15;
 				while(memory[ptr]) {
@@ -1788,7 +1900,9 @@ int main(void) {
 								ptr -= 9;
 							}
 							ptr += 4;
-							memory[ptr] = 0;
+							while(memory[ptr]) {
+								memory[ptr]--;
+							}
 							memory[ptr]++;
 							ptr += 5;
 							while(memory[ptr]) {
@@ -1830,14 +1944,18 @@ int main(void) {
 								ptr -= 9;
 							}
 							ptr += 3;
-							memory[ptr] = 0;
+							while(memory[ptr]) {
+								memory[ptr]--;
+							}
 							memory[ptr]++;
 							ptr += 6;
 							while(memory[ptr]) {
 								ptr += 9;
 							}
 							ptr++;
-							memory[ptr] = 0;
+							while(memory[ptr]) {
+								memory[ptr]--;
+							}
 							memory[ptr]++;
 							ptr--;
 						}
@@ -2052,11 +2170,17 @@ int main(void) {
 				ptr += 9;
 				while(memory[ptr]) {
 					ptr += 3;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr += 4;
 				}
 				ptr -= 9;
@@ -2064,9 +2188,13 @@ int main(void) {
 					ptr -= 9;
 				}
 				ptr += 3;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr += 5;
 				while(memory[ptr]) {
 					ptr += 7;
@@ -2187,7 +2315,9 @@ int main(void) {
 									ptr -= 9;
 								}
 								ptr += 4;
-								memory[ptr] = 0;
+								while(memory[ptr]) {
+									memory[ptr]--;
+								}
 								memory[ptr]++;
 								ptr += 5;
 								while(memory[ptr]) {
@@ -2229,14 +2359,18 @@ int main(void) {
 									ptr -= 9;
 								}
 								ptr += 3;
-								memory[ptr] = 0;
+								while(memory[ptr]) {
+									memory[ptr]--;
+								}
 								memory[ptr]++;
 								ptr += 6;
 								while(memory[ptr]) {
 									ptr += 9;
 								}
 								ptr++;
-								memory[ptr] = 0;
+								while(memory[ptr]) {
+									memory[ptr]--;
+								}
 								memory[ptr]++;
 								ptr--;
 							}
@@ -2351,7 +2485,9 @@ int main(void) {
 							ptr -= 11;
 						}
 						ptr += 5;
-						memory[ptr] = 0;
+						while(memory[ptr]) {
+							memory[ptr]--;
+						}
 						ptr += 2;
 						while(memory[ptr]) {
 							memory[ptr]--;
@@ -2464,7 +2600,9 @@ int main(void) {
 						}
 					}
 					ptr += 4;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr -= 4;
 				}
 				ptr += 4;
@@ -2480,7 +2618,9 @@ int main(void) {
 					ptr += 4;
 					memory[ptr]++;
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr += 2;
 					while(memory[ptr]) {
 						memory[ptr]--;
@@ -2564,9 +2704,13 @@ int main(void) {
 				ptr += 9;
 				while(memory[ptr]) {
 					ptr += 2;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr += 6;
 				}
 				ptr -= 9;
@@ -2574,9 +2718,13 @@ int main(void) {
 					ptr -= 9;
 				}
 				ptr += 3;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr += 5;
 				while(memory[ptr]) {
 					ptr += 5;
@@ -2633,23 +2781,41 @@ int main(void) {
 					}
 					memory[ptr]++;
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr -= 9;
 					while(memory[ptr]) {
 						ptr -= 9;
@@ -2861,7 +3027,9 @@ int main(void) {
 				ptr -= 9;
 				while(memory[ptr]) {
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr--;
 					memory[ptr]--;
 					ptr += 4;
@@ -2968,7 +3136,9 @@ int main(void) {
 								ptr -= 9;
 							}
 							ptr += 4;
-							memory[ptr] = 0;
+							while(memory[ptr]) {
+								memory[ptr]--;
+							}
 							memory[ptr]++;
 							ptr += 5;
 							while(memory[ptr]) {
@@ -3010,14 +3180,18 @@ int main(void) {
 								ptr -= 9;
 							}
 							ptr += 3;
-							memory[ptr] = 0;
+							while(memory[ptr]) {
+								memory[ptr]--;
+							}
 							memory[ptr]++;
 							ptr += 6;
 							while(memory[ptr]) {
 								ptr += 9;
 							}
 							ptr++;
-							memory[ptr] = 0;
+							while(memory[ptr]) {
+								memory[ptr]--;
+							}
 							memory[ptr]++;
 							ptr--;
 						}
@@ -3053,7 +3227,9 @@ int main(void) {
 					ptr += 4;
 					memory[ptr]++;
 					ptr -= 2;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr -= 2;
 				}
 				ptr += 2;
@@ -3074,42 +3250,64 @@ int main(void) {
 				ptr += 4;
 				memory[ptr]--;
 				ptr -= 6;
-				putchar(memory[ptr]);
-				ptr += 2;
+				putchar(memory[ptr]);				ptr += 2;
 			}
 			ptr += 4;
 			while(memory[ptr]) {
 				memory[ptr]--;
 				ptr -= 7;
-				putchar(memory[ptr]);
-				ptr += 7;
+				putchar(memory[ptr]);				ptr += 7;
 			}
 			ptr -= 3;
-			memory[ptr] = 0;
+			while(memory[ptr]) {
+				memory[ptr]--;
+			}
 			ptr++;
-			memory[ptr] = 0;
+			while(memory[ptr]) {
+				memory[ptr]--;
+			}
 			ptr++;
-			memory[ptr] = 0;
+			while(memory[ptr]) {
+				memory[ptr]--;
+			}
 			ptr++;
-			memory[ptr] = 0;
+			while(memory[ptr]) {
+				memory[ptr]--;
+			}
 			ptr++;
-			memory[ptr] = 0;
+			while(memory[ptr]) {
+				memory[ptr]--;
+			}
 			ptr++;
-			memory[ptr] = 0;
+			while(memory[ptr]) {
+				memory[ptr]--;
+			}
 			ptr += 3;
 			while(memory[ptr]) {
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr += 3;
 			}
 			ptr -= 9;
@@ -3119,7 +3317,9 @@ int main(void) {
 			ptr += 9;
 			while(memory[ptr]) {
 				ptr += 5;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr += 4;
 			}
 			ptr -= 9;
@@ -3158,7 +3358,9 @@ int main(void) {
 				memory[ptr]--;
 				ptr += 7;
 				memory[ptr]++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr += 2;
 				while(memory[ptr]) {
 					ptr += 9;
@@ -3182,7 +3384,9 @@ int main(void) {
 							ptr -= 9;
 						}
 						ptr += 7;
-						memory[ptr] = 0;
+						while(memory[ptr]) {
+							memory[ptr]--;
+						}
 						memory[ptr]++;
 						ptr += 3;
 					}
@@ -3241,7 +3445,9 @@ int main(void) {
 				ptr -= 9;
 				while(memory[ptr]) {
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr--;
 					memory[ptr]--;
 					ptr += 7;
@@ -3282,7 +3488,9 @@ int main(void) {
 				ptr += 7;
 				memory[ptr]--;
 				ptr -= 4;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				memory[ptr]++;
 				ptr -= 3;
 			}
@@ -3314,7 +3522,9 @@ int main(void) {
 				ptr -= 9;
 				while(memory[ptr]) {
 					ptr++;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					ptr--;
 					memory[ptr]--;
 					ptr += 7;
@@ -3402,7 +3612,9 @@ int main(void) {
 								ptr -= 9;
 							}
 							ptr += 4;
-							memory[ptr] = 0;
+							while(memory[ptr]) {
+								memory[ptr]--;
+							}
 							memory[ptr]++;
 							ptr += 5;
 							while(memory[ptr]) {
@@ -3444,14 +3656,18 @@ int main(void) {
 								ptr -= 9;
 							}
 							ptr += 3;
-							memory[ptr] = 0;
+							while(memory[ptr]) {
+								memory[ptr]--;
+							}
 							memory[ptr]++;
 							ptr += 6;
 							while(memory[ptr]) {
 								ptr += 9;
 							}
 							ptr++;
-							memory[ptr] = 0;
+							while(memory[ptr]) {
+								memory[ptr]--;
+							}
 							memory[ptr]++;
 							ptr--;
 						}
@@ -3473,7 +3689,9 @@ int main(void) {
 					ptr -= 9;
 				}
 				ptr += 4;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr -= 3;
 				memory[ptr] += 5;
 				while(memory[ptr]) {
@@ -3496,11 +3714,12 @@ int main(void) {
 			ptr += 3;
 		}
 		ptr -= 4;
-		putchar(memory[ptr]);
-		ptr += 10;
+		putchar(memory[ptr]);		ptr += 10;
 		while(memory[ptr]) {
 			ptr += 6;
-			memory[ptr] = 0;
+			while(memory[ptr]) {
+				memory[ptr]--;
+			}
 			ptr += 3;
 		}
 		ptr -= 9;
@@ -3539,7 +3758,9 @@ int main(void) {
 			memory[ptr]--;
 			ptr += 8;
 			memory[ptr]++;
-			memory[ptr] = 0;
+			while(memory[ptr]) {
+				memory[ptr]--;
+			}
 			ptr++;
 			while(memory[ptr]) {
 				ptr += 9;
@@ -3563,7 +3784,9 @@ int main(void) {
 						ptr -= 9;
 					}
 					ptr += 8;
-					memory[ptr] = 0;
+					while(memory[ptr]) {
+						memory[ptr]--;
+					}
 					memory[ptr]++;
 					ptr += 2;
 				}
@@ -3622,7 +3845,9 @@ int main(void) {
 			ptr -= 9;
 			while(memory[ptr]) {
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr--;
 				memory[ptr]--;
 				ptr += 8;
@@ -3663,7 +3888,9 @@ int main(void) {
 			ptr += 8;
 			memory[ptr]--;
 			ptr -= 5;
-			memory[ptr] = 0;
+			while(memory[ptr]) {
+				memory[ptr]--;
+			}
 			memory[ptr]++;
 			ptr -= 3;
 		}
@@ -3695,7 +3922,9 @@ int main(void) {
 			ptr -= 9;
 			while(memory[ptr]) {
 				ptr++;
-				memory[ptr] = 0;
+				while(memory[ptr]) {
+					memory[ptr]--;
+				}
 				ptr--;
 				memory[ptr]--;
 				ptr += 8;
@@ -3785,7 +4014,9 @@ int main(void) {
 							ptr -= 9;
 						}
 						ptr += 4;
-						memory[ptr] = 0;
+						while(memory[ptr]) {
+							memory[ptr]--;
+						}
 						memory[ptr]++;
 						ptr += 5;
 						while(memory[ptr]) {
@@ -3827,14 +4058,18 @@ int main(void) {
 							ptr -= 9;
 						}
 						ptr += 3;
-						memory[ptr] = 0;
+						while(memory[ptr]) {
+							memory[ptr]--;
+						}
 						memory[ptr]++;
 						ptr += 6;
 						while(memory[ptr]) {
 							ptr += 9;
 						}
 						ptr++;
-						memory[ptr] = 0;
+						while(memory[ptr]) {
+							memory[ptr]--;
+						}
 						memory[ptr]++;
 						ptr--;
 					}
@@ -3856,7 +4091,9 @@ int main(void) {
 				ptr -= 9;
 			}
 			ptr += 4;
-			memory[ptr] = 0;
+			while(memory[ptr]) {
+				memory[ptr]--;
+			}
 			ptr -= 3;
 			memory[ptr] += 5;
 			while(memory[ptr]) {

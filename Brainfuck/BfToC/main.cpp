@@ -5,25 +5,27 @@
 #include <iostream>
 #include <vector>
 
-std::vector<std::string> output;
+enum TokenType {Output, Input, Inc, Move, LoopBegin, LoopEnd};
+
+struct Token {
+	TokenType type;
+	int value;
+};
+
+std::vector<Token> output;
 
 int main() {
 	std::ifstream fileInput("program.bf");
 	std::string program((std::istreambuf_iterator<char>(fileInput)), std::istreambuf_iterator<char>());
 	fileInput.close();
 
-	output.push_back("#include <stdlib.h>\n#include <stdio.h>");
-	output.push_back("int main(void) {");
-	output.push_back("unsigned short ptr = 0;");
-	output.push_back("unsigned char memory[65536] = {0};");
-
-	for(unsigned int progCounter = 0; progCounter < program.length() - 1; progCounter++) {
+	for(unsigned progCounter = 0; progCounter < program.length(); progCounter++) {
 		switch(program[progCounter]) {
 		case '.':
-			output.push_back("putchar(memory[ptr]);");
+			output.push_back({Output});
 			break;
 		case ',':
-			output.push_back("memory[ptr] = getchar();");
+			output.push_back({Input});
 			break;
 		case '+':
 		case '-':
@@ -37,14 +39,8 @@ int main() {
 					progCounter++;
 				}
 				progCounter--;
-				if(changeAmount == 1)
-					output.push_back("memory[ptr]++;");
-				else if(changeAmount == -1)
-					output.push_back("memory[ptr]--;");
-				else if(changeAmount > 0)
-					output.push_back("memory[ptr] += " + std::to_string(changeAmount) + ';');
-				else if(changeAmount < 0)
-					output.push_back("memory[ptr] -= " + std::to_string(-changeAmount) + ';');
+				if(changeAmount)
+					output.push_back({Inc, changeAmount});
 			}
 			break;
 		case '>':
@@ -59,66 +55,70 @@ int main() {
 					progCounter++;
 				}
 				progCounter--;
-				if(changeAmount > 0) {
-					if(changeAmount == 1)
-						output.push_back("ptr++;");
-					else
-						output.push_back("ptr += " + std::to_string(changeAmount) + ';');
-				} else if(changeAmount < 0) {
-					if(changeAmount == -1)
-						output.push_back("ptr--;");
-					else
-						output.push_back("ptr -= " + std::to_string(-changeAmount) + ';');
-				}
+				if(changeAmount)
+					output.push_back({Move, changeAmount});
 			}
 			break;
 		case '[':
-			if((program[progCounter + 1] == '-' || program[progCounter + 1] == '+') && program[progCounter + 2] == ']') {
-				progCounter += 2;
-				output.push_back("memory[ptr] = 0;");
-			} else {
-				output.push_back("while(memory[ptr]) {");
-			}
+			output.push_back({LoopBegin});
 			break;
 		case ']':
-			output.push_back("}");
+			output.push_back({LoopEnd});
 			break;
 		default:
 			break;
 		}
 	}
 
-
-
-	if(output[4][0] == 'm') {
-		if(output[4] == "memory[ptr]++;")
-			output[4] == "memory[0] = 1;";
-		else if(output[4] == "memory[ptr]--;")
-			output[4] = "memory[0] = 65535;";
-		else if(output[4][12] == '+')
-			output[4] = "memory[0] = " + output[4].substr(15);
-	}
-
-
-
-	output.push_back("return EXIT_SUCCESS;");
-	output.push_back("}");
-
 	std::ofstream outputFile("output.c");
-	int indentation = 0;
-	for(const auto& line : output) {
-		if(line[0] == '}')
+	unsigned indentation = 1;
+
+	outputFile << "#include <stdlib.h>\n#include <stdio.h>\n\nint main(void) {\n\tunsigned short ptr = 0;\n\tunsigned char memory[65536] = {0};\n\n";
+	for(unsigned i = 0; i < output.size(); i++) {
+		if(output[i].type == LoopEnd)
 			indentation--;
-		if(line[0] == 'r')
-			outputFile << '\n';
-		for(int i = 0; i < indentation; i++)
+		for(unsigned j = 0; j < indentation; j++)
 			outputFile << '\t';
-		outputFile << line << '\n';
-		if(line[0] == 'w' || line[0] == 'i')
-			indentation++;
-		if(line[0] == '#' || (line[0] == 'u' && line[9] == 'c'))
-			outputFile << '\n';
+		switch(output[i].type) {
+			case Output:
+				outputFile << "putchar(memory[ptr]);";
+				break;
+			case Input:
+				outputFile << "memory[ptr] = getchar();\n";
+				break;
+			case Inc:
+				if(output[i].value == 1)
+					outputFile << "memory[ptr]++;\n";
+				else if(output[i].value == -1)
+					outputFile << "memory[ptr]--;\n";
+				else if(output[i].value > 0)
+					outputFile << "memory[ptr] += " << output[i].value << ";\n";
+				else if(output[i].value < 0)
+					outputFile << "memory[ptr] -= " << -output[i].value << ";\n";
+				break;
+			case Move:
+				if(output[i].value == 1)
+					outputFile << "ptr++;\n";
+				else if(output[i].value == -1)
+					outputFile << "ptr--;\n";
+				else if(output[i].value > 0)
+					outputFile << "ptr += " << output[i].value << ";\n";
+				else if(output[i].value < 0)
+					outputFile << "ptr -= " << -output[i].value << ";\n";
+				break;
+			case LoopBegin:
+				outputFile << "while(memory[ptr]) {\n";
+				indentation++;
+				break;
+			case LoopEnd:
+				outputFile << "}\n";
+				break;
+			default:
+				break;
+		}
 	}
+	outputFile << "\n\treturn EXIT_SUCCESS;\n}";
+
 	outputFile.close();
 
 	return EXIT_SUCCESS;
