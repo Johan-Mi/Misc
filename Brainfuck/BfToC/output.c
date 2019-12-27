@@ -1,6 +1,7 @@
+#include <stdlib.h>
 #include <stdio.h>
 
-int main() {
+int main(void) {
 	unsigned short ptr = 0;
 	unsigned char memory[65536] = {0};
 
@@ -3880,5 +3881,5 @@ int main() {
 		ptr += 3;
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }

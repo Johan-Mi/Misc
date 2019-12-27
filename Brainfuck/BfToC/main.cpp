@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string>
 #include <fstream>
 #include <streambuf>
@@ -11,8 +12,8 @@ int main() {
 	std::string program((std::istreambuf_iterator<char>(fileInput)), std::istreambuf_iterator<char>());
 	fileInput.close();
 
-	output.push_back("#include <stdio.h>");
-	output.push_back("int main() {");
+	output.push_back("#include <stdlib.h>\n#include <stdio.h>");
+	output.push_back("int main(void) {");
 	output.push_back("unsigned short ptr = 0;");
 	output.push_back("unsigned char memory[65536] = {0};");
 
@@ -100,7 +101,7 @@ int main() {
 
 
 
-	output.push_back("return 0;");
+	output.push_back("return EXIT_SUCCESS;");
 	output.push_back("}");
 
 	std::ofstream outputFile("output.c");
@@ -120,5 +121,5 @@ int main() {
 	}
 	outputFile.close();
 
-	return 0;
+	return EXIT_SUCCESS;
 }
