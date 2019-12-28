@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <string>
 #include <fstream>
-#include <streambuf>
 #include <iostream>
 #include <vector>
 
@@ -15,12 +14,12 @@ struct Token {
 std::vector<Token> output;
 
 int main() {
-	std::ifstream fileInput("program.bf");
+	std::ifstream fileInput("../program.bf");
 	std::string program((std::istreambuf_iterator<char>(fileInput)), std::istreambuf_iterator<char>());
 	fileInput.close();
 
-	for(unsigned progCounter = 0; progCounter < program.length(); progCounter++) {
-		switch(program[progCounter]) {
+	for(unsigned pc = 0; pc < program.length(); pc++) {
+		switch(program[pc]) {
 		case '.':
 			output.push_back({Output});
 			break;
@@ -31,14 +30,14 @@ int main() {
 		case '-':
 			{
 				int changeAmount = 0;
-				while(program[progCounter] != '<' && program[progCounter] != '>' && program[progCounter] != ',' && program[progCounter] != '.' && program[progCounter] != '[' && program[progCounter] != ']' && progCounter < program.length() - 1) {
-					if(program[progCounter] == '+')
+				while(program[pc] != '<' && program[pc] != '>' && program[pc] != ',' && program[pc] != '.' && program[pc] != '[' && program[pc] != ']' && pc < program.length() - 1) {
+					if(program[pc] == '+')
 						changeAmount++;
-					else if(program[progCounter] == '-')
+					else if(program[pc] == '-')
 						changeAmount--;	
-					progCounter++;
+					pc++;
 				}
-				progCounter--;
+				pc--;
 				if(changeAmount)
 					output.push_back({Inc, changeAmount});
 			}
@@ -47,14 +46,14 @@ int main() {
 		case '<':
 			{
 				int changeAmount = 0;
-				while(program[progCounter] != '+' && program[progCounter] != '-' && program[progCounter] != ',' && program[progCounter] != '.' && program[progCounter] != '[' && program[progCounter] != ']') {
-					if(program[progCounter] == '>')
+				while(program[pc] != '+' && program[pc] != '-' && program[pc] != ',' && program[pc] != '.' && program[pc] != '[' && program[pc] != ']') {
+					if(program[pc] == '>')
 						changeAmount++;
-					else if(program[progCounter] == '<')
+					else if(program[pc] == '<')
 						changeAmount--;	
-					progCounter++;
+					pc++;
 				}
-				progCounter--;
+				pc--;
 				if(changeAmount)
 					output.push_back({Move, changeAmount});
 			}
@@ -70,10 +69,16 @@ int main() {
 		}
 	}
 
-	std::ofstream outputFile("output.c");
-	unsigned indentation = 1;
+	std::ofstream outputFile("../output.c");
+	unsigned indentation = 1; 
+	outputFile << R"(#include <stdlib.h>
+#include <stdio.h>
 
-	outputFile << "#include <stdlib.h>\n#include <stdio.h>\n\nint main(void) {\n\tunsigned short ptr = 0;\n\tunsigned char memory[65536] = {0};\n\n";
+int main(void) {
+	unsigned short ptr = 0;
+	unsigned char memory[65536] = {0};
+
+)";
 	for(unsigned i = 0; i < output.size(); i++) {
 		if(output[i].type == LoopEnd)
 			indentation--;
