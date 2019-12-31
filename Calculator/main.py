@@ -8,24 +8,31 @@ def calc(expr):
 			return variables[expr]
 
 		i = expr.find('(')
-		j = expr.rfind(')')
-		if (i == -1) ^ (j == -1):
+		if ('(' in expr) ^ (')' in expr):
 			raise Exception
-		if i != -1 and j != -1:
+		if i != -1:
+			j = i
+			brackets = 1
+			while brackets:
+				j += 1
+				if expr[j] == '(':
+					brackets += 1
+				elif expr[j] == ')':
+					brackets -= 1
 			return calc(expr[:i] + str(calc(expr[i + 1:j])) + expr[j + 1:])
 
-		i = expr.find('+')
-		j = expr.find('-')
-		if i != -1 and (j == -1 or j > i):
+		i = expr.rfind('+')
+		j = expr.rfind('-')
+		if i != -1 and (j == -1 or j < i):
 			return calc(expr[:i]) + calc(expr[i + 1:])
-		if j != -1 and (i == -1 or i > j):
+		if j != -1 and (i == -1 or i < j):
 			return calc(expr[:j]) - calc(expr[j + 1:])
 
-		i = expr.find('*')
-		j = expr.find('/')
-		if i != -1 and (j == -1 or j > i):
+		i = expr.rfind('*')
+		j = expr.rfind('/')
+		if i != -1 and (j == -1 or j < i):
 			return calc(expr[:i]) * calc(expr[i + 1:])
-		if j != -1 and (i == -1 or i > j):
+		if j != -1 and (i == -1 or i < j):
 			try:
 				return calc(expr[:j]) / calc(expr[j + 1:])
 			except ZeroDivisionError as e:
