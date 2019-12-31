@@ -43,9 +43,7 @@ variables = {}
 while True:
 	inExpr = input('> ')
 
-	exprCopy = inExpr
-	exprCopy.lower()
-	if exprCopy in ['quit', 'q', 'exit']:
+	if inExpr.lower() in ['quit', 'q', 'exit']:
 		break
 
 	inExpr = inExpr.replace(' ', '')
