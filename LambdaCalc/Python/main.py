@@ -86,8 +86,8 @@ while True:
 			print(result)
 			if isTest:
 				if result == expected:
-					print('\033[1;32;40mPassed ✓\033[1;37;40m')
+					print('\033[32mPassed ✓\033[37m')
 				else:
-					print('\033[1;31;40mFailed X\033[1;37;40m')
+					print('\033[31mFailed X\033[37m')
 					print('Expected: %s' % expected)
 		print()
