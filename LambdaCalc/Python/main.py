@@ -56,6 +56,7 @@ def reduce(expr):
 		if expr[1][0] == NodeType.Lambda:
 			apply(expr[1][2], expr[1][1], expr[2])
 			expr[:] = expr[1][2]
+			reduce(expr)
 
 parser = Lark(grammar, parser='lalr', transformer=LambdaTransformer())
 
@@ -64,7 +65,8 @@ tests = [
 	('(x y)', '(x y)'),
 	('lambda x.y', 'λx.y'),
 	('lambda x.lambda y.(x y)', 'λx.λy.(x y)'),
-	('(lambda x.(y x) z)', '(y z)')]
+	('(lambda x.(y x) z)', '(y z)'),
+	('(lambda x.(x x) lambda y.y)', 'λy.y')]
 testNumber = 0
 runTests = True
 
