@@ -8,9 +8,15 @@ class NodeType(Enum):
 	Ident = 0
 	Lambda = 1
 	Application = 2
+	Assignment = 3
+	Undef = 4
 
 grammar = '''
 	start		: expr -> only_arg
+				| assignment -> only_arg
+				| undef -> only_arg
+	assignment	: ident "=" expr -> assignment_expr
+	undef		: "undef" ident -> undef_expr
 	expr		: lambda -> only_arg
 				| application -> only_arg
 				| ident -> only_arg
@@ -28,6 +34,10 @@ class LambdaTransformer(Transformer):
 		return [NodeType.Application, args[0], args[1]]
 	def ident_expr(self, args):
 		return [NodeType.Ident, str(args[0])]
+	def assignment_expr(self, args):
+		return [NodeType.Assignment, args[0], args[1]]
+	def undef_expr(self, args):
+		return [NodeType.Undef, args[0]]
 	def only_arg(self, args):
 		return args[0]
 
@@ -57,6 +67,15 @@ def reduce(expr):
 			apply(expr[1][2], expr[1][1], expr[2])
 			expr[:] = expr[1][2]
 			reduce(expr)
+	elif expr[0] == NodeType.Assignment:
+		reduce(expr[2])
+		variables[expr[1][1]] = deepcopy(expr[2])
+		expr[:] = expr[2]
+	elif expr[0] == NodeType.Ident:
+		if expr[1] in variables:
+			expr[:] = deepcopy(variables[expr[1]])
+
+variables = {}
 
 parser = Lark(grammar, parser='lalr', transformer=LambdaTransformer())
 
@@ -71,25 +90,34 @@ testNumber = 0
 runTests = True
 
 while True:
-		if runTests and tests:
-			isTest = True
-			inExpr, expected = tests.pop(0)
-			print('Test %d> %s' % (testNumber, inExpr))
-			testNumber += 1
-		else:
-			isTest = False
-			inExpr = input('> ')
-			if inExpr.lower() in ('q', 'quit', 'exit'):
-				break
-		if len(inExpr) > 0:
+	if runTests and tests:
+		isTest = True
+		inExpr, expected = tests.pop(0)
+		print('Test %d> %s' % (testNumber, inExpr))
+		testNumber += 1
+	else:
+		isTest = False
+		inExpr = input('> ')
+		if inExpr.lower() in ('q', 'quit', 'exit'):
+			break
+	if len(inExpr) > 0:
+		try:
 			result = parser.parse(inExpr)
-			reduce(result)
-			result = expr_to_str(result)
-			print(result)
-			if isTest:
-				if result == expected:
-					print('\033[32mPassed ✓\033[37m')
-				else:
-					print('\033[31mFailed X\033[37m')
-					print('Expected: %s' % expected)
-		print()
+			if result[0] == NodeType.Undef:
+				if result[1][1] in variables:
+					del variables[result[1][1]]
+			else:
+				reduce(result)
+				result = expr_to_str(result)
+				print(result)
+				if isTest:
+					if result == expected:
+						print('\033[32mPassed ✓\033[37m')
+					else:
+						print('\033[31mFailed X\033[37m')
+						print('Expected: %s' % expected)
+		except RecursionError:
+			print('\033[31mError: infinite loop\033[37m')
+		except:
+			print('\033[31mError: invalid syntax\033[37m')
+	print()
