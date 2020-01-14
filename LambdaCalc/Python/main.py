@@ -28,18 +28,12 @@ grammar = '''
 '''
 
 class LambdaTransformer(Transformer):
-	def lambda_expr(self, args):
-		return [NodeType.Lambda, args[0], args[1]]
-	def application_expr(self, args):
-		return [NodeType.Application, args[0], args[1]]
-	def ident_expr(self, args):
-		return [NodeType.Ident, str(args[0])]
-	def assignment_expr(self, args):
-		return [NodeType.Assignment, args[0], args[1]]
-	def undef_expr(self, args):
-		return [NodeType.Undef, args[0]]
-	def only_arg(self, args):
-		return args[0]
+	lambda_expr = lambda args: [NodeType.Lambda, args[0], args[1]]
+	application_expr = lambda args: [NodeType.Application, args[0], args[1]]
+	ident_expr = lambda args: [NodeType.Ident, str(args[0])]
+	assignment_expr = lambda args: [NodeType.Assignment, args[0], args[1]]
+	undef_expr = lambda args: [NodeType.Undef, args[0]]
+	only_arg = lambda args: args[0]
 
 def expr_to_str(expr):
 	if expr[0] == NodeType.Lambda:
@@ -77,7 +71,7 @@ def reduce(expr):
 
 variables = {}
 
-parser = Lark(grammar, parser='lalr', transformer=LambdaTransformer())
+parser = Lark(grammar, parser='lalr', transformer=LambdaTransformer)
 
 tests = [
 	('x', 'x'),
