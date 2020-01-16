@@ -98,8 +98,7 @@ while True:
 		try:
 			result = parser.parse(inExpr)
 			if result[0] == NodeType.Undef:
-				if result[1][1] in variables:
-					del variables[result[1][1]]
+				del variables[result[1][1]]
 			else:
 				reduce(result)
 				result = expr_to_str(result)
