@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import socket
+from requests import get
 
 port = input('Port to listen on (Blank for 65432): ')
 if port:
