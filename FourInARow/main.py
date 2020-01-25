@@ -5,9 +5,10 @@ Red = 1
 White = 2
 Full = 3
 
-board = []
-for _ in range(7):
-    board.append([Empty] * 5)
+#board = []
+#for _ in range(7):
+    #board.append([Empty] * 5)
+board = list([[Empty] * 5]) * 7
 
 turn = White
 
