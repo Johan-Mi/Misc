@@ -7,13 +7,13 @@ Full = 3
 
 board = []
 for _ in range(7):
-    board.append([Empty] * 5)
+    board.append([Empty] * 6)
 
 turn = White
 
 def printBoard():
     print('\033[0m\033[2J\033[3J\033[;H┌───────┐')
-    for i in range(5):
+    for i in range(6):
         print('│', end='')
         for j in range(7):
             if board[j][i] == Empty:
@@ -26,21 +26,17 @@ def printBoard():
     print('└1234567┘\n')
 
 def checkWin(t):
-    for i in range(5):
+    for i in range(6):
         for j in range(4):
             if all((board[j + k][i] == t for k in range(4))):
                 return t
-    for i in range(7):
-        for j in range(2):
-            if all((board[i][j + k] == t for k in range(4))):
+    for i in range(3):
+        for j in range(7):
+            if all((board[j][i + k] == t for k in range(4))):
                 return t
-    for i in range(2):
         for j in range(4):
-            if all((board[j + k][i + k] == t for k in range(4))):
-                return t
-    for i in range(3, 5):
-        for j in range(4):
-            if all((board[j + k][i - k] == t for k in range(4))):
+            if all((board[j + k][i     + k] == t for k in range(4))) \
+            or all((board[j + k][i + 3 - k] == t for k in range(4))):
                 return t
     if not any([Empty in i for i in board]):
         return Full
@@ -55,7 +51,7 @@ while True:
                 x -= 1
                 if board[x][0] == Empty:
                     y = 0
-                    while y < 4 and board[x][y + 1] == Empty:
+                    while y < 5 and board[x][y + 1] == Empty:
                         y += 1
                     board[x][y] = turn
                     break

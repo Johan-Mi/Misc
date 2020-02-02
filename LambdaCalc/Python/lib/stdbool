@@ -1,0 +1,14 @@
+import stdlib
+
+T = K
+F = KI
+
+OR   = lambda a.lambda b.(a a b)
+AND  = lambda a.lambda b.(a b a)
+NOT  = lambda a.a F T
+XNOR = lambda a.lambda b.a b (NOT b)
+XOR  = lambda a.lambda b.a (NOT b) b
+
+TRUE  = T
+FALSE = F
+BOOL_EQ = XNOR

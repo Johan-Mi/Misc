@@ -1,0 +1,4 @@
+I  = lambda x.x
+K  = lambda a.lambda b.a
+KI = lambda a.lambda b.b
+M  = lambda f.f f
