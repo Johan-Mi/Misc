@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "piece.h"
 
 Shape const leftRotatorArray[] = {
@@ -95,4 +97,31 @@ void tryDrop(Board board, Piece* piece) {
 
 bool pieceCollides(Board board, Piece piece) {
 	return false;
+}
+
+u8 colorOfPiece(Piece piece) {
+	switch(piece.shape) {
+		case O:
+		case T1 ... T4:
+		case I1 ... I4:
+			return 1;
+		case J1 ... J4:
+		case S1 ... S4:
+			return 2;
+		case Z1 ... Z4:
+		case L1 ... L4:
+			return 3;
+		default:
+			return 0;
+	}
+}
+
+Piece randomPiece() {
+	return (Piece){
+		.x = BOARD_WIDTH / 2 - 2,
+		.y = 0,
+		.shape = (Shape[]){
+			O, I1, T1, J1, L1, S1, Z1
+		}[rand() % 7]
+	};
 }

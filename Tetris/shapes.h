@@ -42,7 +42,7 @@ typedef enum {
  * OO- -OO -OO OO-
  * --- --O OO- -O-
  *
- * Z1  Z1  Z3  Z4
+ * Z1  Z2  Z3  Z4
  * OO- --O --- -O-
  * -OO -OO OO- OO-
  * --- -O- -OO O--

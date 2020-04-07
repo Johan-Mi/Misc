@@ -1,4 +1,4 @@
-CFLAGS = -O3 -Wall
+CFLAGS = -O3 -Wall -Wdeclaration-after-statement
 
 objects = main.o piece.o board.o
 
