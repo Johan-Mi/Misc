@@ -15,6 +15,7 @@ typedef struct {
 void tryMoveLeft(Board, Piece*);
 void tryMoveRight(Board, Piece*);
 void tryMoveDown(Board, Piece*);
+void tryMoveUp(Board, Piece*);
 void tryRotLeft(Board, Piece*);
 void tryRotRight(Board, Piece*);
 void tryDrop(Board, Piece*);
