@@ -20,5 +20,6 @@ void tryRotLeft(Board, Piece*);
 void tryRotRight(Board, Piece*);
 void tryDrop(Board, Piece*);
 bool pieceCollides(Board, Piece);
+void placePiece(Board, Piece*);
 u8 colorOfPiece(Piece);
 Piece randomPiece();

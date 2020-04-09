@@ -14,34 +14,35 @@ void drawPiece(Piece);
 SDL_Surface* tileAtlas = NULL;
 SDL_Surface* screen = NULL;
 
-int main(int argc, char *argv[]) {
+int main(void) {
+	bool quit = false;
+
 	Board board;
 	Piece piece;
 
 	SDL_Event event;
 
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_EnableKeyRepeat(350, 50);
+	SDL_EnableKeyRepeat(300, 40);
 	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, SDL_SWSURFACE);
-
 	tileAtlas = SDL_LoadBMP("gfx/tileAtlas.bmp");
 
 	srand(time(NULL));
 
-	randomizeBoard(board, 10, 10);
+	randomizeBoard(board, 0, 0);
 	piece = randomPiece();
 
-	for(;;) {
+	while(!quit) {
 		while(SDL_PollEvent(&event)) {
 			switch(event.type) {
 				case SDL_QUIT:
-					SDL_Quit();
-					return EXIT_SUCCESS;
+					quit = true;
+					break;
 				case SDL_KEYDOWN:
 					switch(event.key.keysym.sym) {
 						case SDLK_ESCAPE:
-							SDL_Quit();
-							return EXIT_SUCCESS;
+							quit = true;
+							break;
 						case SDLK_a:
 							tryMoveLeft(board, &piece);
 							break;
@@ -51,14 +52,16 @@ int main(int argc, char *argv[]) {
 						case SDLK_s:
 							tryMoveDown(board, &piece);
 							break;
-						case SDLK_w:
-							tryMoveUp(board, &piece);
-							break;
-						case SDLK_q:
+						case SDLK_LCTRL:
+						case SDLK_x:
 							tryRotLeft(board, &piece);
 							break;
-						case SDLK_e:
+						case SDLK_w:
+						case SDLK_c:
 							tryRotRight(board, &piece);
+							break;
+						case SDLK_SPACE:
+							tryDrop(board, &piece);
 							break;
 						default:
 							break;
@@ -94,7 +97,7 @@ void drawBoard(Board board) {
 void drawPiece(Piece piece) {
 	u8 color = colorOfPiece(piece);
 
-	for(u8 i = 0; i < 4; i++) {
-		drawTile(color, piece.x + tileCoordinates[piece.shape][i][0], piece.y + tileCoordinates[piece.shape][i][1]);
-	}
+	for(u8 i = 0; i < 4; i++)
+		drawTile(color, piece.x + tileCoordinates[piece.shape][i][0],
+				piece.y + tileCoordinates[piece.shape][i][1]);
 }

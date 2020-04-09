@@ -86,6 +86,28 @@ u8 const tileCoordinates[29][4][2] = {
 	[Z4] = {{1, 0}, {0, 1}, {1, 1}, {0, 2}},
 };
 
+i8 const wallKicks[16][5][2] = {
+	/* J L S T Z */
+	{{ 0, 0}, {-1, 0}, {-1, 1}, { 0,-2}, {-1,-2}},
+	{{ 0, 0}, { 1, 0}, { 1,-1}, { 0, 2}, { 1, 2}},
+	{{ 0, 0}, { 1, 0}, { 1,-1}, { 0, 2}, { 1, 2}},
+	{{ 0, 0}, {-1, 0}, {-1, 1}, { 0,-2}, {-1,-2}},
+	{{ 0, 0}, { 1, 0}, { 1, 1}, { 0,-2}, { 1,-2}},
+	{{ 0, 0}, {-1, 0}, {-1,-1}, { 0, 2}, {-1, 2}},
+	{{ 0, 0}, {-1, 0}, {-1,-1}, { 0, 2}, {-1, 2}},
+	{{ 0, 0}, { 1, 0}, { 1, 1}, { 0,-2}, { 1,-2}},
+
+	/* I */
+	{{ 0, 0}, {-2, 0}, { 1, 0}, {-2,-1}, { 1, 2}},
+	{{ 0, 0}, { 2, 0}, {-1, 0}, { 2, 1}, {-1,-2}},
+	{{ 0, 0}, {-1, 0}, { 2, 0}, {-1, 2}, { 2,-1}},
+	{{ 0, 0}, { 1, 0}, {-2, 0}, { 1,-2}, {-2, 1}},
+	{{ 0, 0}, { 2, 0}, {-1, 0}, { 2, 1}, {-1,-2}},
+	{{ 0, 0}, {-2, 0}, { 1, 0}, {-2,-1}, { 1, 2}},
+	{{ 0, 0}, { 1, 0}, {-2, 0}, { 1,-2}, {-2, 1}},
+	{{ 0, 0}, {-1, 0}, { 2, 0}, {-1, 2}, { 2,-1}},
+};
+
 void tryMoveLeft(Board board, Piece* piece) {
 	piece->x--;
 	if(pieceCollides(board, *piece))
@@ -100,8 +122,10 @@ void tryMoveRight(Board board, Piece* piece) {
 
 void tryMoveDown(Board board, Piece* piece) {
 	piece->y++;
-	if(pieceCollides(board, *piece))
+	if(pieceCollides(board, *piece)) {
 		piece->y--;
+		placePiece(board, piece);
+	}
 }
 
 void tryMoveUp(Board board, Piece* piece) {
@@ -111,15 +135,103 @@ void tryMoveUp(Board board, Piece* piece) {
 }
 
 void tryRotLeft(Board board, Piece* piece) {
+	int i;
+
 	piece->shape = leftRotatorArray[piece->shape];
-	if(pieceCollides(board, *piece))
-		piece->shape = rightRotatorArray[piece->shape];
+
+	switch(piece->shape) {
+		case T1: case J1: case L1: case S1: case Z1:
+			i = 1;
+			break;
+		case T2: case J2: case L2: case S2: case Z2:
+			i = 3;
+			break;
+		case T3: case J3: case L3: case S3: case Z3:
+			i = 5;
+			break;
+		case T4: case J4: case L4: case S4: case Z4:
+			i = 7;
+			break;
+		case I1:
+			i = 9;
+			break;
+		case I2:
+			i = 11;
+			break;
+		case I3:
+			i = 13;
+			break;
+		case I4:
+			i = 15;
+			break;
+		case O:
+			return;
+		default:
+			return;
+	}
+
+	for(u8 j = 0; j < 5; j++) {
+		piece->x += wallKicks[i][j][0];
+		piece->y -= wallKicks[i][j][1];
+		if(pieceCollides(board, *piece)) {
+			piece->x -= wallKicks[i][j][0];
+			piece->y += wallKicks[i][j][1];
+		} else {
+			return;
+		}
+	}
+
+	piece->shape = rightRotatorArray[piece->shape];
 }
 
 void tryRotRight(Board board, Piece* piece) {
+	int i;
+
 	piece->shape = rightRotatorArray[piece->shape];
-	if(pieceCollides(board, *piece))
-		piece->shape = leftRotatorArray[piece->shape];
+
+	switch(piece->shape) {
+		case T1: case J1: case L1: case S1: case Z1:
+			i = 0;
+			break;
+		case T2: case J2: case L2: case S2: case Z2:
+			i = 2;
+			break;
+		case T3: case J3: case L3: case S3: case Z3:
+			i = 4;
+			break;
+		case T4: case J4: case L4: case S4: case Z4:
+			i = 6;
+			break;
+		case I1:
+			i = 8;
+			break;
+		case I2:
+			i = 10;
+			break;
+		case I3:
+			i = 12;
+			break;
+		case I4:
+			i = 14;
+			break;
+		case O:
+			return;
+		default:
+			return;
+	}
+
+	for(u8 j = 0; j < 5; j++) {
+		piece->x += wallKicks[i][j][0];
+		piece->y -= wallKicks[i][j][1];
+		if(pieceCollides(board, *piece)) {
+			piece->x -= wallKicks[i][j][0];
+			piece->y += wallKicks[i][j][1];
+		} else {
+			return;
+		}
+	}
+
+	piece->shape = leftRotatorArray[piece->shape];
 }
 
 void tryDrop(Board board, Piece* piece) {
@@ -127,6 +239,7 @@ void tryDrop(Board board, Piece* piece) {
 		piece->y++;
 	} while(!pieceCollides(board, *piece));
 	piece->y--;
+	placePiece(board, piece);
 }
 
 bool pieceCollides(Board board, Piece piece) {
@@ -140,6 +253,14 @@ bool pieceCollides(Board board, Piece piece) {
 	}
 
 	return false;
+}
+
+void placePiece(Board board, Piece* piece) {
+	u8 color = colorOfPiece(*piece);
+	for(u8 i = 0; i < 4; i++)
+		board[(u8)(piece->y + tileCoordinates[piece->shape][i][1])][(u8)(piece->x + tileCoordinates[piece->shape][i][0])] = color;
+	*piece = randomPiece();
+	clearFullRows(board);
 }
 
 u8 colorOfPiece(Piece piece) {
