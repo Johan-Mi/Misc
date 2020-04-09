@@ -14,6 +14,8 @@ void drawPiece(Piece);
 SDL_Surface* tileAtlas = NULL;
 SDL_Surface* screen = NULL;
 
+int speed = 4000;
+
 int main(void) {
 	bool quit = false;
 
@@ -22,8 +24,10 @@ int main(void) {
 
 	SDL_Event event;
 
+	uint64_t timer = 0;
+
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_EnableKeyRepeat(300, 40);
+	SDL_EnableKeyRepeat(230, 35);
 	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, SDL_SWSURFACE);
 	tileAtlas = SDL_LoadBMP("gfx/tileAtlas.bmp");
 
@@ -70,6 +74,13 @@ int main(void) {
 				default:
 					break;
 			}
+		}
+
+		timer++;
+		if(!(timer % speed)) {
+			tryMoveDown(board, &piece);
+			if(!(timer % (speed * speed)))
+				speed--;
 		}
 
 		drawBoard(board);
