@@ -20,7 +20,6 @@ void clearFullRows(Board board) {
 			if(!board[i][j])
 				goto not_full;
 		memmove(&board[1], board, i * BOARD_WIDTH);
-		/*memset(&board[i], 0, BOARD_WIDTH);*/
 		memset(board, 0, BOARD_WIDTH);
 not_full:;
 	}
