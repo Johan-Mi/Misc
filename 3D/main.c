@@ -151,9 +151,6 @@ int main(void) {
 		for(size_t i = 0; i < LENGTH(points); i++) {
 			float3d dp = viewTransform(points[i]);
 			if(dp.z > 0) {
-				SDL_RenderDrawPoint(renderer,
-						dp.x + SCREEN_WIDTH / 2,
-						SCREEN_HEIGHT / 2 - dp.y);
 				SDL_RenderFillRect(renderer, &(SDL_Rect){
 						dp.x + SCREEN_WIDTH / 2 - POINT_SIZE / 2,
 						SCREEN_HEIGHT / 2 - dp.y - POINT_SIZE / 2,
