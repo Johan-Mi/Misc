@@ -95,12 +95,6 @@ int main(void) {
 
 	glPointSize(5);
 	glClearColor(0xff, 0xff, 0xff, 0xff);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 	
 	cam.x = 0.5f;
 	cam.y = 0.5f;
