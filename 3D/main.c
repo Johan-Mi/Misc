@@ -8,6 +8,7 @@
 #include "types.h"
 
 #define LENGTH(arr) (sizeof(arr) / sizeof((arr)[0]))
+#define SWAP(a, b) {__typeof__(a) swp = a; a = b; b = swp;}
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480 
@@ -15,8 +16,13 @@
 #define MOVE_SPEED 5.0f
 #define TURN_SPEED 3.0f
 
+#define DRAW_POINTS 0
+#define DRAW_LINES 0
+#define DRAW_TRIS 1
+
 Float3d viewTransform(Float3d);
 bool zClipLine(Float3d*, Float3d*);
+bool zClipTri(Float3d*, Float3d*, Float3d*, Float3d*);
 
 Camera cam;
 
@@ -46,6 +52,21 @@ size_t const lines[][2] = {
 	{ 6, 7 },
 };
 
+Tri tris[] = {
+	{ 0, 1, 2, { 0xff, 0x00, 0x00 } },
+	{ 3, 1, 2, { 0xff, 0x00, 0x00 } },
+	{ 0, 1, 4, { 0x00, 0xff, 0x00 } },
+	{ 5, 1, 4, { 0x00, 0xff, 0x00 } },
+	{ 6, 7, 2, { 0x00, 0x00, 0xff } },
+	{ 3, 7, 2, { 0x00, 0x00, 0xff } },
+	{ 5, 4, 6, { 0xff, 0x88, 0x00 } },
+	{ 5, 7, 6, { 0xff, 0x88, 0x00 } },
+	{ 3, 5, 1, { 0x88, 0x00, 0xff } },
+	{ 3, 5, 7, { 0x88, 0x00, 0xff } },
+	{ 0, 4, 2, { 0x00, 0x88, 0xff } },
+	{ 6, 4, 2, { 0x00, 0x88, 0xff } },
+};
+
 int main(void) {
 	bool quit = false;
 
@@ -66,18 +87,26 @@ int main(void) {
 			SCREEN_HEIGHT,
 			SDL_WINDOW_OPENGL);
 	glcontext = SDL_GL_CreateContext(window);
+
+	SDL_GL_SetSwapInterval(1);
+
+	glClearDepth(1.0f);
+	glEnable(GL_DEPTH_TEST);
+
+	glPointSize(5);
+	glClearColor(0xff, 0xff, 0xff, 0xff);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 	
 	cam.x = 0.5f;
 	cam.y = 0.5f;
 	cam.z = -3.0f;
 	cam.rx = 0.0f;
 	cam.ry = M_PI_2;
-
-	SDL_GL_SetSwapInterval(1);
-
-	glPointSize(5);
-	glClearColor(0xff, 0xff, 0xff, 0xff);
-	glColor3b(0x00, 0x00, 0x00);
 
 	while(!quit) {
 		SDL_Event event;
@@ -144,15 +173,45 @@ int main(void) {
 		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glBegin(GL_POINTS);
-		for(size_t i = 0; i < LENGTH(points); i++) {
-			Float3d dp = viewTransform(points[i]);
-			if(dp.z > 0) {
-				glVertex2f(dp.x, dp.y * SCREEN_WIDTH / SCREEN_HEIGHT);
+#if DRAW_TRIS
+		glBegin(GL_TRIANGLES);
+		for(size_t i = 0; i < LENGTH(tris); i++) {
+			Float3d p1 = viewTransform(points[tris[i].p1]);
+			Float3d p2 = viewTransform(points[tris[i].p2]);
+			Float3d p3 = viewTransform(points[tris[i].p3]);
+			Float3d p4 = (Float3d){ .z = NAN };
+
+			if(zClipTri(&p1, &p2, &p3, &p4)) {
+				glColor3ub(tris[i].color.r,
+						tris[i].color.g,
+						tris[i].color.b);
+				glVertex3f(p1.x,
+						p1.y * SCREEN_WIDTH / SCREEN_HEIGHT,
+						1 - 1 / p1.z);
+				glVertex3f(p2.x,
+						p2.y * SCREEN_WIDTH / SCREEN_HEIGHT,
+						1 - 1 / p2.z);
+				glVertex3f(p3.x,
+						p3.y * SCREEN_WIDTH / SCREEN_HEIGHT,
+						1 - 1 / p3.z);
+				if(p4.z == p4.z) {
+					glVertex3f(p1.x,
+							p1.y * SCREEN_WIDTH / SCREEN_HEIGHT,
+							1 - 1 / p1.z);
+					glVertex3f(p3.x,
+							p3.y * SCREEN_WIDTH / SCREEN_HEIGHT,
+							1 - 1 / p3.z);
+					glVertex3f(p4.x,
+							p4.y * SCREEN_WIDTH / SCREEN_HEIGHT,
+							1 - 1 / p4.z);
+				}
 			}
 		}
 		glEnd();
+#endif
 
+#if DRAW_LINES
+		glColor3ub(0x00, 0x00, 0x00);
 		glBegin(GL_LINES);
 		for(size_t i = 0; i < LENGTH(lines); i++) {
 			Float3d p1 = viewTransform(points[lines[i][0]]);
@@ -164,6 +223,17 @@ int main(void) {
 			}
 		}
 		glEnd();
+#endif
+
+#if DRAW_POINTS
+		glBegin(GL_POINTS);
+		for(size_t i = 0; i < LENGTH(points); i++) {
+			Float3d dp = viewTransform(points[i]);
+			if(dp.z > 0.0f)
+				glVertex2f(dp.x, dp.y * SCREEN_WIDTH / SCREEN_HEIGHT);
+		}
+		glEnd();
+#endif
 
 		SDL_GL_SwapWindow(window);
 	}
@@ -201,11 +271,8 @@ bool zClipLine(Float3d *p1, Float3d *p2) {
 	if(p1->z <= 0.0f && p2->z <= 0.0f)
 		return false;
 
-	if(p2->z <= 0.0f) {
-		Float3d *const swp = p1;
-		p1 = p2;
-		p2 = swp;
-	}
+	if(p2->z <= 0.0f)
+		SWAP(p1, p2)
 
 	f = p1->z / (p2->z - p1->z);
 	*p1 = (Float3d){
@@ -214,4 +281,39 @@ bool zClipLine(Float3d *p1, Float3d *p2) {
 			0.0f
 	};
 	return true;
+}
+
+bool zClipTri(Float3d *p1, Float3d *p2, Float3d *p3, Float3d *p4) {
+	switch((p1->z > 0.0f) + (p2->z > 0.0f) + (p3->z > 0.0f)) {
+		case 0:
+			return false;
+		case 1:
+			if(p1->z > 0.0f) {
+				zClipLine(p1, p2);
+				zClipLine(p1, p3);
+			} else if(p2->z > 0.0f) {
+				zClipLine(p2, p1);
+				zClipLine(p2, p3);
+			} else {
+				zClipLine(p3, p1);
+				zClipLine(p3, p2);
+			}
+			return true;
+		case 2:
+			{
+				if(p2->z <= 0.0f)
+					SWAP(*p1, *p2)
+				else if(p3->z <= 0.0f)
+					SWAP(*p1, *p3)
+
+				*p4 = *p1;
+				zClipLine(p2, p1);
+				zClipLine(p3, p4);
+			}
+			return true;
+		case 3:
+			return true;
+	}
+
+	return false;
 }
