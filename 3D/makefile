@@ -1,2 +1,2 @@
-main: main.c
-	gcc -o main main.c -lm -lSDL2 -O3 -Wall -Wextra
+main: main.c types.h
+	gcc -o main main.c -lm -lSDL2 -lGL -O3 -Wall -Wextra -Wdeclaration-after-statement
