@@ -12,5 +12,7 @@
 
 #define MAX_DENSITY 20 /* Used for randomizeBoard() */
 
+#define GHOST_COLOR 4
+
 typedef uint8_t u8;
 typedef int8_t i8;

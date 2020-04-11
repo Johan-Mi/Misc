@@ -14,7 +14,6 @@
 
 #define MOVE_SPEED 5.0f
 #define TURN_SPEED 3.0f
-#define ZSCALE 1
 
 Float3d viewTransform(Float3d);
 bool zClipLine(Float3d*, Float3d*);
@@ -188,8 +187,8 @@ Float3d viewTransform(Float3d p) {
 
 	if(z == 0.0f)
 		z = 0.0000001f;
-	x *= ZSCALE / z;
-	y *= ZSCALE / z;
+	x /= z;
+	y /= z;
 
 	return (Float3d){ x, y, z };
 }

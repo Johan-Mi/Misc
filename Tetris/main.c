@@ -10,6 +10,7 @@ extern u8 const tileCoordinates[29][4][2];
 void drawTile(u8, u8, u8);
 void drawBoard(Board);
 void drawPiece(Piece);
+void drawGhost(Board, Piece);
 
 SDL_Surface* tileAtlas = NULL;
 SDL_Surface* screen = NULL;
@@ -77,13 +78,11 @@ int main(void) {
 		}
 
 		timer++;
-		if(!(timer % speed)) {
+		if(!(timer % speed))
 			tryMoveDown(board, &piece);
-			if(!(timer % (speed * speed)))
-				speed--;
-		}
 
 		drawBoard(board);
+		drawGhost(board, piece);
 		drawPiece(piece);
 
 		SDL_Flip(screen);
@@ -110,5 +109,16 @@ void drawPiece(Piece piece) {
 
 	for(u8 i = 0; i < 4; i++)
 		drawTile(color, piece.x + tileCoordinates[piece.shape][i][0],
+				piece.y + tileCoordinates[piece.shape][i][1]);
+}
+
+void drawGhost(Board board, Piece piece) {
+	do {
+		piece.y++;
+	} while(!pieceCollides(board, piece));
+	piece.y--;
+
+	for(u8 i = 0; i < 4; i++)
+		drawTile(GHOST_COLOR, piece.x + tileCoordinates[piece.shape][i][0],
 				piece.y + tileCoordinates[piece.shape][i][1]);
 }
