@@ -7,7 +7,6 @@
 
 #include "types.h"
 
-#define LENGTH(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define SWAP(a, b) {__typeof__(a) swp = a; a = b; b = swp;}
 #define MKARR(t, c) ((t*)malloc((c) * sizeof(t)))
 
@@ -36,47 +35,6 @@ Tri *tris;
 
 size_t numPoints = 0;
 size_t numTris = 0;
-
-/*Float3d const points[] = {*/
-	/*{ 0, 0, 0 },*/
-	/*{ 0, 0, 1 },*/
-	/*{ 0, 1, 0 },*/
-	/*{ 0, 1, 1 },*/
-	/*{ 1, 0, 0 },*/
-	/*{ 1, 0, 1 },*/
-	/*{ 1, 1, 0 },*/
-	/*{ 1, 1, 1 },*/
-/*};*/
-
-/*size_t const lines[][2] = {*/
-	/*{ 0, 1 },*/
-	/*{ 0, 2 },*/
-	/*{ 1, 3 },*/
-	/*{ 2, 3 },*/
-	/*{ 0, 4 },*/
-	/*{ 1, 5 },*/
-	/*{ 2, 6 },*/
-	/*{ 3, 7 },*/
-	/*{ 4, 5 },*/
-	/*{ 4, 6 },*/
-	/*{ 5, 7 },*/
-	/*{ 6, 7 },*/
-/*};*/
-
-/*Tri tris[] = {*/
-	/*{ 0, 1, 2, { 0xff, 0x00, 0x00 } },*/
-	/*{ 3, 1, 2, { 0xff, 0x00, 0x00 } },*/
-	/*{ 0, 1, 4, { 0x00, 0xff, 0x00 } },*/
-	/*{ 5, 1, 4, { 0x00, 0xff, 0x00 } },*/
-	/*{ 6, 7, 2, { 0x00, 0x00, 0xff } },*/
-	/*{ 3, 7, 2, { 0x00, 0x00, 0xff } },*/
-	/*{ 5, 4, 6, { 0xff, 0x88, 0x00 } },*/
-	/*{ 5, 7, 6, { 0xff, 0x88, 0x00 } },*/
-	/*{ 3, 5, 1, { 0x88, 0x00, 0xff } },*/
-	/*{ 3, 5, 7, { 0x88, 0x00, 0xff } },*/
-	/*{ 0, 4, 2, { 0x00, 0x88, 0xff } },*/
-	/*{ 6, 4, 2, { 0x00, 0x88, 0xff } },*/
-/*};*/
 
 int main(void) {
 	bool quit = false;
@@ -189,11 +147,12 @@ int main(void) {
 			Float3d p1 = viewTransform(points[tris[i].p1]);
 			Float3d p2 = viewTransform(points[tris[i].p2]);
 			Float3d p3 = viewTransform(points[tris[i].p3]);
-			Float3d p4 = (Float3d){ .z = NAN };
+			Float3d p4 = { .z = NAN };
 
 			if(zClipTri(&p1, &p2, &p3, &p4)) {
 				Float3d normal = triNormal(&p1, &p2, &p3);
-				float colorMultiplier = 1.0f - cbrtf(fabsf(normal.x + normal.y)) * 0.05f;
+				float colorMultiplier = 1.0f - 
+					cbrtf(fabsf(normal.x + normal.y)) * 0.05f;
 				glColor3f((float)tris[i].color.r * colorMultiplier,
 						tris[i].color.g * colorMultiplier,
 						tris[i].color.b * colorMultiplier);
@@ -221,19 +180,6 @@ int main(void) {
 		}
 		glEnd();
 #endif
-
-		/*glColor3ub(0x00, 0x00, 0x00);*/
-		/*glBegin(GL_LINES);*/
-		/*for(size_t i = 0; i < LENGTH(lines); i++) {*/
-			/*Float3d p1 = viewTransform(points[lines[i][0]]);*/
-			/*Float3d p2 = viewTransform(points[lines[i][1]]);*/
-
-			/*if(zClipLine(&p1, &p2)) {*/
-				/*glVertex2f(p1.x, p1.y * SCREEN_WIDTH / SCREEN_HEIGHT);*/
-				/*glVertex2f(p2.x, p2.y * SCREEN_WIDTH / SCREEN_HEIGHT);*/
-			/*}*/
-		/*}*/
-		/*glEnd();*/
 
 #if DRAW_POINTS
 		glColor3ub(0x00, 0x00, 0x00);
@@ -343,7 +289,8 @@ void loadObjFile(char const* fileName) {
 				};
 			} else if(line[0] == 'f' && line[1] == ' ') {
 				size_t s1, s2, s3, s4, unused = 0;
-				int p = sscanf(line + 2, "%lu/%lu/%lu %lu/%lu/%lu %lu/%lu/%lu %lu",
+				int p = sscanf(line + 2,
+						"%lu/%lu/%lu %lu/%lu/%lu %lu/%lu/%lu %lu",
 						&s1, &unused, &unused,
 						&s2, &unused, &unused,
 						&s3, &unused, &unused,
@@ -365,19 +312,19 @@ void loadObjFile(char const* fileName) {
 }
 
 Float3d triNormal(Float3d *p1, Float3d *p2, Float3d *p3) {
-	Float3d v = (Float3d){
+	Float3d v = {
 		p2->x - p1->x,
 		p2->y - p1->y,
 		p2->z - p1->z,
 	};
 
-	Float3d w = (Float3d){
+	Float3d w = {
 		p3->x - p1->x,
 		p3->y - p1->y,
 		p3->z - p1->z,
 	};
 	
-	Float3d n = (Float3d){
+	Float3d n = {
 		v.y * w.z - v.z * w.y,
 		v.z * w.x - v.x * w.z,
 		v.x * w.y - v.y * w.x,
