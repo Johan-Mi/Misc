@@ -11,7 +11,7 @@ typedef struct {
 } Camera;
 
 typedef struct {
-	uint8_t r, g, b;
+	float r, g, b;
 } Rgb;
 
 typedef struct {

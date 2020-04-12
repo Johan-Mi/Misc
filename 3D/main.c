@@ -9,6 +9,7 @@
 
 #define LENGTH(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define SWAP(a, b) {__typeof__(a) swp = a; a = b; b = swp;}
+#define MKARR(t, c) ((t*)malloc((c) * sizeof(t)))
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480 
@@ -17,55 +18,65 @@
 #define TURN_SPEED 3.0f
 
 #define DRAW_POINTS 0
-#define DRAW_LINES 0
 #define DRAW_TRIS 1
+
+#define POINT_ARRAY_SIZE 16384
+#define TRI_ARRAY_SIZE 16384
 
 Float3d viewTransform(Float3d);
 bool zClipLine(Float3d*, Float3d*);
 bool zClipTri(Float3d*, Float3d*, Float3d*, Float3d*);
+void loadObjFile(char const*);
+Float3d triNormal(Float3d*, Float3d*, Float3d*);
 
 Camera cam;
 
-Float3d const points[] = {
-	{ 0, 0, 0 },
-	{ 0, 0, 1 },
-	{ 0, 1, 0 },
-	{ 0, 1, 1 },
-	{ 1, 0, 0 },
-	{ 1, 0, 1 },
-	{ 1, 1, 0 },
-	{ 1, 1, 1 },
-};
+Float3d *points;
+Tri *tris;
 
-size_t const lines[][2] = {
-	{ 0, 1 },
-	{ 0, 2 },
-	{ 1, 3 },
-	{ 2, 3 },
-	{ 0, 4 },
-	{ 1, 5 },
-	{ 2, 6 },
-	{ 3, 7 },
-	{ 4, 5 },
-	{ 4, 6 },
-	{ 5, 7 },
-	{ 6, 7 },
-};
+size_t numPoints = 0;
+size_t numTris = 0;
 
-Tri tris[] = {
-	{ 0, 1, 2, { 0xff, 0x00, 0x00 } },
-	{ 3, 1, 2, { 0xff, 0x00, 0x00 } },
-	{ 0, 1, 4, { 0x00, 0xff, 0x00 } },
-	{ 5, 1, 4, { 0x00, 0xff, 0x00 } },
-	{ 6, 7, 2, { 0x00, 0x00, 0xff } },
-	{ 3, 7, 2, { 0x00, 0x00, 0xff } },
-	{ 5, 4, 6, { 0xff, 0x88, 0x00 } },
-	{ 5, 7, 6, { 0xff, 0x88, 0x00 } },
-	{ 3, 5, 1, { 0x88, 0x00, 0xff } },
-	{ 3, 5, 7, { 0x88, 0x00, 0xff } },
-	{ 0, 4, 2, { 0x00, 0x88, 0xff } },
-	{ 6, 4, 2, { 0x00, 0x88, 0xff } },
-};
+/*Float3d const points[] = {*/
+	/*{ 0, 0, 0 },*/
+	/*{ 0, 0, 1 },*/
+	/*{ 0, 1, 0 },*/
+	/*{ 0, 1, 1 },*/
+	/*{ 1, 0, 0 },*/
+	/*{ 1, 0, 1 },*/
+	/*{ 1, 1, 0 },*/
+	/*{ 1, 1, 1 },*/
+/*};*/
+
+/*size_t const lines[][2] = {*/
+	/*{ 0, 1 },*/
+	/*{ 0, 2 },*/
+	/*{ 1, 3 },*/
+	/*{ 2, 3 },*/
+	/*{ 0, 4 },*/
+	/*{ 1, 5 },*/
+	/*{ 2, 6 },*/
+	/*{ 3, 7 },*/
+	/*{ 4, 5 },*/
+	/*{ 4, 6 },*/
+	/*{ 5, 7 },*/
+	/*{ 6, 7 },*/
+/*};*/
+
+/*Tri tris[] = {*/
+	/*{ 0, 1, 2, { 0xff, 0x00, 0x00 } },*/
+	/*{ 3, 1, 2, { 0xff, 0x00, 0x00 } },*/
+	/*{ 0, 1, 4, { 0x00, 0xff, 0x00 } },*/
+	/*{ 5, 1, 4, { 0x00, 0xff, 0x00 } },*/
+	/*{ 6, 7, 2, { 0x00, 0x00, 0xff } },*/
+	/*{ 3, 7, 2, { 0x00, 0x00, 0xff } },*/
+	/*{ 5, 4, 6, { 0xff, 0x88, 0x00 } },*/
+	/*{ 5, 7, 6, { 0xff, 0x88, 0x00 } },*/
+	/*{ 3, 5, 1, { 0x88, 0x00, 0xff } },*/
+	/*{ 3, 5, 7, { 0x88, 0x00, 0xff } },*/
+	/*{ 0, 4, 2, { 0x00, 0x88, 0xff } },*/
+	/*{ 6, 4, 2, { 0x00, 0x88, 0xff } },*/
+/*};*/
 
 int main(void) {
 	bool quit = false;
@@ -78,6 +89,11 @@ int main(void) {
 
 	SDL_Window *window = NULL;
 	SDL_GLContext glcontext;
+
+	points = MKARR(Float3d, POINT_ARRAY_SIZE);
+	tris = MKARR(Tri, TRI_ARRAY_SIZE);
+
+	loadObjFile("teapot.obj");
 
 	SDL_Init(SDL_INIT_EVERYTHING);
 	window = SDL_CreateWindow("3D",
@@ -169,16 +185,18 @@ int main(void) {
 
 #if DRAW_TRIS
 		glBegin(GL_TRIANGLES);
-		for(size_t i = 0; i < LENGTH(tris); i++) {
+		for(size_t i = 0; i < numTris; i++) {
 			Float3d p1 = viewTransform(points[tris[i].p1]);
 			Float3d p2 = viewTransform(points[tris[i].p2]);
 			Float3d p3 = viewTransform(points[tris[i].p3]);
 			Float3d p4 = (Float3d){ .z = NAN };
 
 			if(zClipTri(&p1, &p2, &p3, &p4)) {
-				glColor3ub(tris[i].color.r,
-						tris[i].color.g,
-						tris[i].color.b);
+				Float3d normal = triNormal(&p1, &p2, &p3);
+				float colorMultiplier = 1.0f - cbrtf(fabsf(normal.x + normal.y)) * 0.05f;
+				glColor3f((float)tris[i].color.r * colorMultiplier,
+						tris[i].color.g * colorMultiplier,
+						tris[i].color.b * colorMultiplier);
 				glVertex3f(p1.x,
 						p1.y * SCREEN_WIDTH / SCREEN_HEIGHT,
 						1 - 1 / p1.z);
@@ -204,25 +222,23 @@ int main(void) {
 		glEnd();
 #endif
 
-#if DRAW_LINES
-		glColor3ub(0x00, 0x00, 0x00);
-		glBegin(GL_LINES);
-		for(size_t i = 0; i < LENGTH(lines); i++) {
-			Float3d p1 = viewTransform(points[lines[i][0]]);
-			Float3d p2 = viewTransform(points[lines[i][1]]);
+		/*glColor3ub(0x00, 0x00, 0x00);*/
+		/*glBegin(GL_LINES);*/
+		/*for(size_t i = 0; i < LENGTH(lines); i++) {*/
+			/*Float3d p1 = viewTransform(points[lines[i][0]]);*/
+			/*Float3d p2 = viewTransform(points[lines[i][1]]);*/
 
-			if(zClipLine(&p1, &p2)) {
-				glVertex2f(p1.x, p1.y * SCREEN_WIDTH / SCREEN_HEIGHT);
-				glVertex2f(p2.x, p2.y * SCREEN_WIDTH / SCREEN_HEIGHT);
-			}
-		}
-		glEnd();
-#endif
+			/*if(zClipLine(&p1, &p2)) {*/
+				/*glVertex2f(p1.x, p1.y * SCREEN_WIDTH / SCREEN_HEIGHT);*/
+				/*glVertex2f(p2.x, p2.y * SCREEN_WIDTH / SCREEN_HEIGHT);*/
+			/*}*/
+		/*}*/
+		/*glEnd();*/
 
 #if DRAW_POINTS
 		glColor3ub(0x00, 0x00, 0x00);
 		glBegin(GL_POINTS);
-		for(size_t i = 0; i < LENGTH(points); i++) {
+		for(size_t i = 0; i < numPoints; i++) {
 			Float3d dp = viewTransform(points[i]);
 			if(dp.z > 0.0f)
 				glVertex2f(dp.x, dp.y * SCREEN_WIDTH / SCREEN_HEIGHT);
@@ -311,4 +327,67 @@ bool zClipTri(Float3d *p1, Float3d *p2, Float3d *p3, Float3d *p4) {
 	}
 
 	return false;
+}
+
+void loadObjFile(char const* fileName) {
+	FILE *fp = fopen(fileName, "r");
+	if(fp) {
+		char line[128];
+
+		while(fgets(line, sizeof(line), fp)) {
+			if(line[0] == 'v' && line[1] == ' ') {
+				float f1, f2, f3;
+				sscanf(line + 2, "%f %f %f", &f1, &f2, &f3);
+				points[numPoints++] = (Float3d) {
+					f1, f2, f3
+				};
+			} else if(line[0] == 'f' && line[1] == ' ') {
+				size_t s1, s2, s3, s4, unused = 0;
+				int p = sscanf(line + 2, "%lu/%lu/%lu %lu/%lu/%lu %lu/%lu/%lu %lu",
+						&s1, &unused, &unused,
+						&s2, &unused, &unused,
+						&s3, &unused, &unused,
+						&s4);
+				tris[numTris++] = (Tri) {
+					s1 - 1, s2 - 1, s3 - 1, { 0.7f, 0.7f, 0.7f }
+				};
+				if(p > 9) {
+					tris[numTris++] = (Tri) {
+						s1 - 1, s3 - 1, s4 - 1, { 0.7f, 0.7f, 0.7f }
+					};
+				}
+			}
+		}
+		fclose(fp);
+	} else {
+		perror(fileName);
+	}
+}
+
+Float3d triNormal(Float3d *p1, Float3d *p2, Float3d *p3) {
+	Float3d v = (Float3d){
+		p2->x - p1->x,
+		p2->y - p1->y,
+		p2->z - p1->z,
+	};
+
+	Float3d w = (Float3d){
+		p3->x - p1->x,
+		p3->y - p1->y,
+		p3->z - p1->z,
+	};
+	
+	Float3d n = (Float3d){
+		v.y * w.z - v.z * w.y,
+		v.z * w.x - v.x * w.z,
+		v.x * w.y - v.y * w.x,
+	};
+
+	float l = n.x * n.x + n.y * n.y + n.z * n.z;
+
+	return (Float3d){
+		n.x / l,
+		n.y / l,
+		n.z / l,
+	};
 }
