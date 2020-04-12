@@ -195,6 +195,9 @@ int main(void) {
 		SDL_GL_SwapWindow(window);
 	}
 
+	free(points);
+	free(tris);
+
 	SDL_GL_DeleteContext(glcontext);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
