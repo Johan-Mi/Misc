@@ -220,6 +220,7 @@ int main(void) {
 #endif
 
 #if DRAW_POINTS
+		glColor3ub(0x00, 0x00, 0x00);
 		glBegin(GL_POINTS);
 		for(size_t i = 0; i < LENGTH(points); i++) {
 			Float3d dp = viewTransform(points[i]);
