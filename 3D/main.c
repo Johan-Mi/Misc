@@ -29,8 +29,11 @@ void loadObjFile(char const*);
 Float3d triNormal(Float3d const *const,
 		Float3d const *const,
 		Float3d const *const);
+float dotProduct(Float3d const *const, Float3d const *const);
 
 Camera cam;
+
+Float3d const lightingDirection = { 0.0f, 1.0f, 0.0f };
 
 Float3d *points;
 Tri *tris;
@@ -155,7 +158,7 @@ int main(void) {
 				Float3d normal = triNormal(&p1, &p2, &p3);
 				float colorMultiplier = 1.0f - 
 					cbrtf(fabsf(normal.x + normal.y)) * 0.05f;
-				glColor3f((float)tris[i].color.r * colorMultiplier,
+				glColor3f(tris[i].color.r * colorMultiplier,
 						tris[i].color.g * colorMultiplier,
 						tris[i].color.b * colorMultiplier);
 				glVertex3f(p1.x,
@@ -344,4 +347,8 @@ Float3d triNormal(Float3d const *const p1,
 		n.y / l,
 		n.z / l,
 	};
+}
+
+float dotProduct(Float3d const *const p1, Float3d const *const p2) {
+	return p1->x * p2->x + p1->y * p2->y + p1->z * p2->z;
 }
