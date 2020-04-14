@@ -22,11 +22,13 @@
 #define POINT_ARRAY_SIZE 16384
 #define TRI_ARRAY_SIZE 16384
 
-Float3d viewTransform(Float3d);
+Float3d viewTransform(Float3d const *const);
 bool zClipLine(Float3d*, Float3d*);
 bool zClipTri(Float3d*, Float3d*, Float3d*, Float3d*);
 void loadObjFile(char const*);
-Float3d triNormal(Float3d*, Float3d*, Float3d*);
+Float3d triNormal(Float3d const *const,
+		Float3d const *const,
+		Float3d const *const);
 
 Camera cam;
 
@@ -144,9 +146,9 @@ int main(void) {
 #if DRAW_TRIS
 		glBegin(GL_TRIANGLES);
 		for(size_t i = 0; i < numTris; i++) {
-			Float3d p1 = viewTransform(points[tris[i].p1]);
-			Float3d p2 = viewTransform(points[tris[i].p2]);
-			Float3d p3 = viewTransform(points[tris[i].p3]);
+			Float3d p1 = viewTransform(&points[tris[i].p1]);
+			Float3d p2 = viewTransform(&points[tris[i].p2]);
+			Float3d p3 = viewTransform(&points[tris[i].p3]);
 			Float3d p4 = { .z = NAN };
 
 			if(zClipTri(&p1, &p2, &p3, &p4)) {
@@ -185,7 +187,7 @@ int main(void) {
 		glColor3ub(0x00, 0x00, 0x00);
 		glBegin(GL_POINTS);
 		for(size_t i = 0; i < numPoints; i++) {
-			Float3d dp = viewTransform(points[i]);
+			Float3d dp = viewTransform(&points[i]);
 			if(dp.z > 0.0f)
 				glVertex2f(dp.x, dp.y * SCREEN_WIDTH / SCREEN_HEIGHT);
 		}
@@ -205,10 +207,10 @@ int main(void) {
 	return EXIT_SUCCESS;
 };
 
-Float3d viewTransform(Float3d p) {
-	float x = p.x - cam.x;
-	float y = p.y - cam.y;
-	float z = p.z - cam.z;
+Float3d viewTransform(Float3d const *const p) {
+	float x = p->x - cam.x;
+	float y = p->y - cam.y;
+	float z = p->z - cam.z;
 
 	float const z2 = x * cosf(cam.ry) + z * sinf(cam.ry);
 	x = z * cosf(cam.ry) - x * sinf(cam.ry);
@@ -314,7 +316,9 @@ void loadObjFile(char const* fileName) {
 	}
 }
 
-Float3d triNormal(Float3d *p1, Float3d *p2, Float3d *p3) {
+Float3d triNormal(Float3d const *const p1,
+		Float3d const *const p2,
+		Float3d const *const p3) {
 	Float3d v = {
 		p2->x - p1->x,
 		p2->y - p1->y,
