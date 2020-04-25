@@ -22,4 +22,4 @@ void tryDrop(Board, Piece*);
 bool pieceCollides(Board, Piece);
 void placePiece(Board, Piece*);
 u8 colorOfPiece(Piece);
-Piece randomPiece();
+Piece randomPiece(void);
