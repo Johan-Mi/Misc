@@ -262,6 +262,13 @@ void Mos6502::sendIrq() noexcept {
 	}
 }
 
+uint8_t Mos6502::readByte(uint16_t const addresss) const noexcept {
+	return 0;
+}
+void Mos6502::writeByte(uint16_t address, uint8_t const value) noexcept {
+
+}
+
 uint16_t Mos6502::readWord(uint16_t const address) const noexcept {
 	return static_cast<uint16_t>(readByte(address + 1)) << 8
 		| readByte(address);
@@ -928,8 +935,4 @@ void Mos6502::step() noexcept {
 
 Mos6502::Mos6502() noexcept {
 	sendReset();
-}
-
-Mos6502::~Mos6502() noexcept {
-
 }

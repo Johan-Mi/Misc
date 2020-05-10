@@ -14,9 +14,7 @@ public:
 };
 
 int main() {
-	Mos6502 *cpu = new MyMos6502;
-
-	delete cpu;
+	MyMos6502 cpu;
 
 	return 0;
 }

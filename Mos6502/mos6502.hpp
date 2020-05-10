@@ -111,8 +111,8 @@ class Mos6502 {
 	MemLocation opZpgX() const noexcept;
 	MemLocation opZpgY() const noexcept;
 
-	virtual uint8_t readByte(uint16_t const addresss) const noexcept = 0;
-	virtual void writeByte(uint16_t address, uint8_t const value) noexcept = 0;
+	virtual uint8_t readByte(uint16_t const addresss) const noexcept;
+	virtual void writeByte(uint16_t address, uint8_t const value) noexcept;
 
 	uint16_t readWord(uint16_t const address) const noexcept;
 	void writeWord(uint16_t address, uint16_t const value) noexcept;
@@ -129,5 +129,4 @@ public:
 	void step() noexcept;
 
 	Mos6502() noexcept;
-	virtual ~Mos6502() noexcept;
 };
