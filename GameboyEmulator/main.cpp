@@ -156,7 +156,7 @@ struct MemoryBus {
 			case 0xe000 ... 0xfdff:
 				write_byte(address - 0x2000, value);
 				return;
-			default:;
+			default:
 					assert(!"Invalid address for read_byte");
 		}
 	}
@@ -206,7 +206,6 @@ struct CPU {
 	void execute(u8 instruction) {
 		switch(instruction) {
 			/* NOP         */ case 0x00:
-				/* NOP */
 				pc++;
 				cycle(4);
 				break;
@@ -541,7 +540,6 @@ struct CPU {
 				cycle(4);
 				break;
 			/* LD B,B      */ case 0x40:
-				/* NOP */
 				pc++;
 				cycle(4);
 				break;
@@ -586,7 +584,6 @@ struct CPU {
 				cycle(4);
 				break;
 			/* LD C,C      */ case 0x49:
-				/* NOP */
 				pc++;
 				cycle(4);
 				break;
@@ -630,7 +627,6 @@ struct CPU {
 				cycle(4);
 				break;
 			/* LD D,D      */ case 0x52:
-				/* NOP */
 				pc++;
 				cycle(4);
 				break;
@@ -675,7 +671,6 @@ struct CPU {
 				cycle(4);
 				break;
 			/* LD E,E      */ case 0x5b:
-				/* NOP */
 				pc++;
 				cycle(4);
 				break;
@@ -765,7 +760,6 @@ struct CPU {
 				cycle(4);
 				break;
 			/* LD L,L      */ case 0x6d:
-				/* NOP */
 				pc++;
 				cycle(4);
 				break;
@@ -855,7 +849,6 @@ struct CPU {
 				cycle(8);
 				break;
 			/* LD A,A      */ case 0x7f:
-				/* NOP */
 				pc++;
 				cycle(4);
 				break;
