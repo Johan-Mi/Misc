@@ -14,12 +14,12 @@ typedef struct {
 
 void tryMoveLeft(Board, Piece*);
 void tryMoveRight(Board, Piece*);
-void tryMoveDown(Board, Piece*);
+void tryMoveDown(Board, Piece*, Piece*);
 void tryMoveUp(Board, Piece*);
 void tryRotLeft(Board, Piece*);
 void tryRotRight(Board, Piece*);
-void tryDrop(Board, Piece*);
+void tryDrop(Board, Piece*, Piece*);
 bool pieceCollides(Board, Piece);
-void placePiece(Board, Piece*);
+void placePiece(Board, Piece*, Piece*);
 u8 colorOfPiece(Piece);
 Piece randomPiece(void);

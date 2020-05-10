@@ -11,7 +11,7 @@
 #define MKARR(t, c) ((t*)malloc((c) * sizeof(t)))
 
 #define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480 
+#define SCREEN_HEIGHT 480
 
 #define MOVE_SPEED 5.0f
 #define TURN_SPEED 3.0f
@@ -32,8 +32,6 @@ Float3d triNormal(Float3d const *const,
 float dotProduct(Float3d const *const, Float3d const *const);
 
 Camera cam;
-
-Float3d const lightingDirection = { 0.0f, 1.0f, 0.0f };
 
 Float3d *points;
 Tri *tris;
@@ -74,7 +72,7 @@ int main(void) {
 
 	glPointSize(5);
 	glClearColor(0xff, 0xff, 0xff, 0xff);
-	
+
 	cam.x = 0.5f;
 	cam.y = 0.5f;
 	cam.z = -3.0f;
@@ -143,7 +141,6 @@ int main(void) {
 		if(keys[SDL_SCANCODE_Q])
 			cam.y -= MOVE_SPEED * deltaTime;
 
-		glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 #if DRAW_TRIS
@@ -156,7 +153,7 @@ int main(void) {
 
 			if(zClipTri(&p1, &p2, &p3, &p4)) {
 				Float3d normal = triNormal(&p1, &p2, &p3);
-				float colorMultiplier = 1.0f - 
+				float colorMultiplier = 1.0f -
 					cbrtf(fabsf(normal.x + normal.y)) * 0.05f;
 				glColor3f(tris[i].color.r * colorMultiplier,
 						tris[i].color.g * colorMultiplier,
@@ -333,7 +330,7 @@ Float3d triNormal(Float3d const *const p1,
 		p3->y - p1->y,
 		p3->z - p1->z,
 	};
-	
+
 	Float3d n = {
 		v.y * w.z - v.z * w.y,
 		v.z * w.x - v.x * w.z,

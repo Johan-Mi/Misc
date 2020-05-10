@@ -84,11 +84,11 @@ void tryMoveRight(Board board, Piece* piece) {
 		piece->x--;
 }
 
-void tryMoveDown(Board board, Piece* piece) {
+void tryMoveDown(Board board, Piece* piece, Piece* nextPiece) {
 	piece->y++;
 	if(pieceCollides(board, *piece)) {
 		piece->y--;
-		placePiece(board, piece);
+		placePiece(board, piece, nextPiece);
 	}
 }
 
@@ -198,12 +198,12 @@ void tryRotRight(Board board, Piece* piece) {
 	piece->shape = leftRotatorArray[piece->shape];
 }
 
-void tryDrop(Board board, Piece* piece) {
+void tryDrop(Board board, Piece* piece, Piece* nextPiece) {
 	do {
 		piece->y++;
 	} while(!pieceCollides(board, *piece));
 	piece->y--;
-	placePiece(board, piece);
+	placePiece(board, piece, nextPiece);
 }
 
 bool pieceCollides(Board board, Piece piece) {
@@ -220,12 +220,13 @@ bool pieceCollides(Board board, Piece piece) {
 	return false;
 }
 
-void placePiece(Board board, Piece* piece) {
+void placePiece(Board board, Piece* piece, Piece* nextPiece) {
 	u8 color = colorOfPiece(*piece);
 	for(u8 i = 0; i < 4; i++)
 		board[(u8)(piece->y + tileCoordinates[piece->shape][i][1])]
 			[(u8)(piece->x + tileCoordinates[piece->shape][i][0])] = color;
-	*piece = randomPiece();
+	*piece = *nextPiece;
+	*nextPiece = randomPiece();
 	clearFullRows(board);
 }
 
@@ -234,13 +235,13 @@ u8 colorOfPiece(Piece piece) {
 		case O:
 		case T1 ... T4:
 		case I1 ... I4:
-			return 10;
+			return 13;
 		case J1 ... J4:
 		case S1 ... S4:
-			return 11;
+			return 14;
 		case Z1 ... Z4:
 		case L1 ... L4:
-			return 12;
+			return 15;
 		default:
 			return 0;
 	}

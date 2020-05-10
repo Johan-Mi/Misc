@@ -2,20 +2,21 @@
 #include <cstdint>
 #include <stddef.h>
 #include <string.h>
-#include <cassert>
+#include <assert.h>
 #include <array>
-typedef uint8_t u8;
-typedef uint16_t u16;
-typedef int8_t i8;
-typedef uint32_t u32;
 
-u8 cartridge_memory[0x200000];
+using u8 = uint8_t;
+using u16 = uint16_t;
+using i8 = int8_t;
+using u32 = uint32_t;
+
+std::array<u8, 0x200000> cartridge_memory;
 
 constexpr size_t vram_begin = 0x8000;
 constexpr size_t vram_end = 0x9fff;
 constexpr size_t vram_size = vram_end - vram_begin + 1;
 
-const sf::Color palette[4]{
+const std::array<sf::Color, 4> palette = {
 	sf::Color(0, 0, 0),
 	sf::Color(85, 85, 85),
 	sf::Color(170, 170, 170),
@@ -23,8 +24,6 @@ const sf::Color palette[4]{
 };
 
 u8 frame_buffer[160 * 144 * 4]{255};
-
-enum ArithmeticTarget {	A, B, C, D, E, H, L, AF, BC, DE, HL };
 
 struct Regs {
 	union {
@@ -34,43 +33,51 @@ struct Regs {
 				bool subtract : 1;
 				bool half_carry : 1;
 				bool carry : 1;
-				u8 _ : 4;
+				u8 : 4;
 			} f;
 			u8 a;
 		};
 		u16 af;
 	};
 	union {
-		struct { u8 c, b; };
+		struct {
+			u8 c, b;
+		};
 		u16 bc = 0x0013;
 	};
 	union {
-		struct { u8 e, d; };
+		struct {
+			u8 e, d;
+		};
 		u16 de = 0x00d8;
 	};
 	union {
-		struct { u8 l, h; };
+		struct {
+			u8 l, h;
+		};
 		u16 hl = 0x014d;
 	};
 };
 
-
-
-
-
-enum TilePixelValue { Zero, One, Two, Three};
-typedef std::array<std::array<TilePixelValue, 8>, 8> Tile;
-Tile empty_tile() { return Tile{Zero}; }
+enum TilePixelValue {
+	Zero, One, Two, Three
+};
+using Tile = std::array<std::array<TilePixelValue, 8>, 8>;
+constexpr Tile empty_tile() {
+	return Tile{Zero};
+}
 
 struct GPU {
-	u8 vram[vram_size];
+	std::array<u8, vram_size> vram;
 	Tile tile_set[384];
 
-	u8& read_vram(u16 address) { return vram[address]; }
+	u8& read_vram(u16 const address) {
+		return vram[address];
+	}
 
-	void write_vram(u16 index, u8 value) {
+	void write_vram(u16 const index, u8 const value) {
         vram[index] = value;
-        
+
 		if(index >= 0x1800)
 			return;
 
@@ -89,10 +96,18 @@ struct GPU {
 
             TilePixelValue value;
 			switch((msb != 0) << 1 | (lsb != 0)) {
-				case 0:	value = Zero;
-				case 1:	value = One;
-				case 2:	value = Two;
-				case 3:	value = Three;
+				case 0:
+					value = Zero;
+					break;
+				case 1:
+					value = One;
+					break;
+				case 2:
+					value = Two;
+					break;
+				case 3:
+					value = Three;
+					break;
 			}
 
             tile_set[tile_index][row_index][pixel_index] = value;
@@ -138,14 +153,18 @@ struct MemoryBus {
 		}
 	}
 
-	u16 read_word(u16 address) { return (u16)read_byte(address)  | read_byte(address + 1) << 8; }
-	u16 read_word_reverse(u16 address) { return read_byte(address) << 8  | read_byte(address + 1); }
-	
+	u16 read_word(u16 address) {
+		return (u16)read_byte(address)  | read_byte(address + 1) << 8;
+	}
+	u16 read_word_reverse(u16 address) {
+		return read_byte(address) << 8  | read_byte(address + 1);
+	}
+
 	void write_word(u16 address, u16 value) {
 		write_byte(address, value >> 8);
 		write_byte(address + 1, value);
 	}
-	
+
 	void write_byte(u16 address, u8 value) {
 		switch(address) {
 			case 0x0000 ... 0x7fff:
@@ -156,15 +175,11 @@ struct MemoryBus {
 			case 0xe000 ... 0xfdff:
 				write_byte(address - 0x2000, value);
 				return;
-			default:
+			default:;
 				assert(!"Invalid address for read_byte");
 		}
 	}
 };
-
-
-
-
 
 struct CPU {
 	Regs regs;
@@ -174,9 +189,13 @@ struct CPU {
 	u8 cycles = 0;
 	bool halted = false;
 	bool stopped = false;
-	enum { Off, On, Enabling, Disabling } interrupt_mode = On;
+	enum {
+		Off, On, Enabling, Disabling
+	} interrupt_mode = On;
 
-	void cycle(u8 c) { cycles = c;	}
+	void cycle(u8 c = 1) {
+		cycles = c;
+	}
 
 	// void step() {
 	// 	if(!halted && !stopped) {
@@ -184,7 +203,7 @@ struct CPU {
 	// 			interrupt_mode = On;
 	// 		else if(interrupt_mode == Disabling)
 	// 			interrupt_mode = Off;
-			
+
 	// 		if(!cycles) {
 	// 			u8 instruction_byte = bus.read_byte(pc);
 	// 			pc = execute(instruction_byte);
@@ -205,7 +224,7 @@ struct CPU {
 
 	void execute(u8 instruction) {
 		switch(instruction) {
-			/* NOP         */ case 0x00:	/*////////////////////////////NOP////////////////////////*/	pc++;	cycle(4);	break;
+			/* NOP         */ case 0x00:	/*////////////////////////////NOP/////////////////////// */	pc++;	cycle(4);	break;
 			/* LD BC,d16   */ case 0x01:	regs.bc = bus.read_word_reverse(pc + 1);					pc+=3;	cycle(12);	break;
 			/* LD (BC),A   */ case 0x02:	bus.write_byte(regs.bc, regs.a);							pc++;	cycle(8);	break;
 			/* INC BC      */ case 0x03:	regs.bc++;													pc++;	cycle(8);	break;
@@ -269,7 +288,7 @@ struct CPU {
 			/* DEC A       */ case 0x3d:	dec_byte(regs.l);											pc++;	cycle(4);	break;
 			/* LD A,d8     */ case 0x3e:	regs.a = bus.read_byte(pc + 1);								pc+=2;	cycle(8);	break;
 			/* CCF         */ case 0x3f:	ccf();														pc++;	cycle(4);	break;
-			/* LD B,B      */ case 0x40:	/*////////////////////////////NOP////////////////////////*/ pc++;	cycle(4);	break;
+			/* LD B,B      */ case 0x40:	/*////////////////////////////NOP/////////////////////// */ pc++;	cycle(4);	break;
 			/* LD B,C      */ case 0x41:	regs.b = regs.c;											pc++;	cycle(4);	break;
 			/* LD B,D      */ case 0x42:	regs.b = regs.d;											pc++;	cycle(4);	break;
 			/* LD B,E      */ case 0x43:	regs.b = regs.e;											pc++;	cycle(4);	break;
@@ -278,7 +297,7 @@ struct CPU {
 			/* LD B,(HL)   */ case 0x46:	regs.b = bus.read_byte(regs.hl);							pc++;	cycle(8);	break;
 			/* LD B,A      */ case 0x47:	regs.b = regs.a;											pc++;	cycle(4);	break;
 			/* LD C,B      */ case 0x48:	regs.c = regs.b;											pc++;	cycle(4);	break;
-			/* LD C,C      */ case 0x49:	/*////////////////////////////NOP////////////////////////*/ pc++;	cycle(4);	break;
+			/* LD C,C      */ case 0x49:	/*////////////////////////////NOP/////////////////////// */ pc++;	cycle(4);	break;
 			/* LD C,D      */ case 0x4a:	regs.c = regs.d;											pc++;	cycle(4);	break;
 			/* LD C,E      */ case 0x4b:	regs.c = regs.e;											pc++;	cycle(4);	break;
 			/* LD C,H      */ case 0x4c:	regs.c = regs.h;											pc++;	cycle(4);	break;
@@ -287,7 +306,7 @@ struct CPU {
 			/* LD C,A      */ case 0x4f:	regs.c = regs.a;											pc++;	cycle(4);	break;
 			/* LD D,B      */ case 0x50:	regs.d = regs.b;											pc++;	cycle(4);	break;
 			/* LD D,C      */ case 0x51:	regs.d = regs.c;											pc++;	cycle(4);	break;
-			/* LD D,D      */ case 0x52:	/*////////////////////////////NOP////////////////////////*/	pc++;	cycle(4);	break;
+			/* LD D,D      */ case 0x52:	/*////////////////////////////NOP/////////////////////// */	pc++;	cycle(4);	break;
 			/* LD D,E      */ case 0x53:	regs.d = regs.e;											pc++;	cycle(4);	break;
 			/* LD D,H      */ case 0x54:	regs.d = regs.h;											pc++;	cycle(4);	break;
 			/* LD D,L      */ case 0x55:	regs.d = regs.l;											pc++;	cycle(4);	break;
@@ -296,7 +315,7 @@ struct CPU {
 			/* LD E,B      */ case 0x58:	regs.e = regs.b;											pc++;	cycle(4);	break;
 			/* LD E,C      */ case 0x59:	regs.e = regs.c;											pc++;	cycle(4);	break;
 			/* LD E,D      */ case 0x5a:	regs.e = regs.d;											pc++;	cycle(4);	break;
-			/* LD E,E      */ case 0x5b:	/*////////////////////////////NOP////////////////////////*/	pc++;	cycle(4);	break;
+			/* LD E,E      */ case 0x5b:	/*////////////////////////////NOP/////////////////////// */	pc++;	cycle(4);	break;
 			/* LD E,H      */ case 0x5c:	regs.e = regs.h;											pc++;	cycle(4);	break;
 			/* LD E,L      */ case 0x5d:	regs.e = regs.l;											pc++;	cycle(4);	break;
 			/* LD E,(HL)   */ case 0x5e:	regs.e = bus.read_byte(regs.hl);							pc++;	cycle(8);	break;
@@ -314,7 +333,7 @@ struct CPU {
 			/* LD L,D      */ case 0x6a:	regs.l = regs.d;											pc++;	cycle(4);	break;
 			/* LD L,E      */ case 0x6b:	regs.l = regs.e;											pc++;	cycle(4);	break;
 			/* LD L,H      */ case 0x6c:	regs.l = regs.h;											pc++;	cycle(4);	break;
-			/* LD L,L      */ case 0x6d:	/*////////////////////////////NOP////////////////////////*/ pc++;	cycle(4);	break;
+			/* LD L,L      */ case 0x6d:	/*////////////////////////////NOP/////////////////////// */ pc++;	cycle(4);	break;
 			/* LD L,(HL)   */ case 0x6e:	regs.l = bus.read_byte(regs.hl);							pc++;	cycle(8);	break;
 			/* LD L,A      */ case 0x6f:	regs.l = regs.a;											pc++;	cycle(4);	break;
 			/* LD (HL),B   */ case 0x70:	bus.write_byte(regs.hl, regs.b);							pc++;	cycle(8);	break;
@@ -332,7 +351,7 @@ struct CPU {
 			/* LD A,H      */ case 0x7c:	regs.a = regs.h;											pc++;	cycle(4);	break;
 			/* LD A,L      */ case 0x7d:	regs.a = regs.l;											pc++;	cycle(4);	break;
 			/* LD A,(HL)   */ case 0x7e:	regs.a = bus.read_byte(regs.hl);							pc++;	cycle(8);	break;
-			/* LD A,A      */ case 0x7f:	/*////////////////////////////NOP////////////////////////*/ pc++;	cycle(4);	break;
+			/* LD A,A      */ case 0x7f:	/*////////////////////////////NOP/////////////////////// */ pc++;	cycle(4);	break;
 			/* ADD A,B     */ case 0x80:	add_a(regs.b);												pc++;	cycle(4);	break;
 			/* ADD A,C     */ case 0x81:	add_a(regs.c);												pc++;	cycle(4);	break;
 			/* ADD A,D     */ case 0x82:	add_a(regs.d);												pc++;	cycle(4);	break;
@@ -408,7 +427,7 @@ struct CPU {
 			/* RET Z       */ case 0xc8:	if(regs.f.zero) pc = pop(); else pc++;								cycle();	break;
 			/* RET         */ case 0xc9:	pc = pop();															cycle(16);	break;
 			/* JP Z,a16    */ case 0xca:	if(regs.f.zero) pc = bus.read_word(pc + 1); else pc += 3;			cycle();	break;
-			/* Prefix      */			 /*/////////////////////////////Prefix///////////////////////*/
+			/* Prefix      */			 /*/////////////////////////////Prefix////////////////////// */
 			/* CALL Z,a16  */ case 0xcc:	if(regs.f.zero) call(); else pc += 3;								cycle();	break;
 			/* CALL a16    */ case 0xcd:	call();																cycle(24);	break;
 			/* ADC A,d8    */ case 0xce:	adc_a(bus.read_byte(pc + 1));								pc+=2;	cycle(8);	break;
@@ -416,7 +435,7 @@ struct CPU {
 			/* RET NC      */ case 0xd0:	if(regs.f.carry) pc++; else pc = pop();								cycle();	break;
 			/* POP DE      */ case 0xd1:	regs.de = pop();											pc++;	cycle(12);	break;
 			/* JP NC,a16   */ case 0xd2:	if(regs.f.carry) pc += 3; else pc = bus.read_word(pc + 1);			cycle();	break;
-			/* Invalid     */ case 0xd3:	/*/////////////////////////Invalid///////////////////////*/ pc++;				break;
+			/* Invalid     */ case 0xd3:	/*/////////////////////////Invalid////////////////////// */ pc++;				break;
 			/* CALL NC,a16 */ case 0xd4:	if(regs.f.carry) pc += 3; else call();								cycle();	break;
 			/* PUSH DE     */ case 0xd5:	push(regs.de);												pc++;	cycle(16);	break;
 			/* SUB d8      */ case 0xd6:	sub_a(bus.read_byte(pc + 1));								pc++;	cycle(8);	break;
@@ -424,32 +443,32 @@ struct CPU {
 			/* RET C       */ case 0xd8:	if(regs.f.carry) pc = pop(); else pc++;								cycle();	break;
 			/* RETI        */ case 0xd9:	pc = pop();	interrupt_mode = Enabling;								cycle(16);	break;
 			/* JP C,a16    */ case 0xda:	if(regs.f.zero) pc = bus.read_word(pc + 1); else pc += 3;			cycle();	break;
-			/* Invalid     */ case 0xdb:	/*/////////////////////////Invalid///////////////////////*/ pc++;				break;
+			/* Invalid     */ case 0xdb:	/*/////////////////////////Invalid////////////////////// */ pc++;				break;
 			/* CALL C,a16  */ case 0xdc:	if(regs.f.carry) call(); else pc += 3;								cycle();	break;
-			/* Invalid     */ case 0xdd:	/*/////////////////////////Invalid///////////////////////*/ pc++;				break;
+			/* Invalid     */ case 0xdd:	/*/////////////////////////Invalid////////////////////// */ pc++;				break;
 			/* SBC A,d8    */ case 0xde:	sub_a(bus.read_byte(pc + 1));								pc+=2;	cycle(8);	break;
 			/* RST 18H     */ case 0xdf:	push(pc);													pc=24;	cycle(16);	break;
 			/* LDH (a8),A  */ case 0xe0:	bus.write_byte(0xff | bus.read_byte(pc + 1), regs.a);		pc+=2;	cycle(12);	break;
 			/* POP HL      */ case 0xe1:	regs.hl = pop();											pc++;	cycle(12);	break;
 			/* LD (C),A    */ case 0xe2:	bus.write_byte(regs.c, regs.a);								pc++;	cycle(8);	break;
-			/* Invalid     */ case 0xe3:	/*/////////////////////////Invalid///////////////////////*/ pc++;				break;
-			/* Invalid     */ case 0xe4:	/*/////////////////////////Invalid///////////////////////*/ pc++;				break;
+			/* Invalid     */ case 0xe3:	/*/////////////////////////Invalid////////////////////// */ pc++;				break;
+			/* Invalid     */ case 0xe4:	/*/////////////////////////Invalid////////////////////// */ pc++;				break;
 			/* PUSH HL     */ case 0xe5:	push(regs.hl);												pc++;	cycle(16);	break;
 			/* AND d8      */ case 0xe6:	and_a(bus.read_byte(pc + 1));								pc+=2;	cycle(8);	break;
 			/* RST 20H     */ case 0xe7:	push(pc);													pc=32;	cycle(16);	break;
 			/* ADD SP,r8   */ case 0xe8:	add_sp(bus.read_byte(pc + 1));								pc+=2;	cycle(16);	break;
 			/* JP (HL)     */ case 0xe9:	pc = bus.read_word(regs.hl);										cycle(4);	break;
 			/* LD (a16),A  */ case 0xea:	bus.write_byte(bus.read_word(pc + 1), regs.a);				pc+=3;	cycle(16);	break;
-			/* Invalid     */ case 0xeb:	/*/////////////////////////Invalid///////////////////////*/ pc++;				break;
-			/* Invalid     */ case 0xec:	/*/////////////////////////Invalid///////////////////////*/ pc++;				break;
-			/* Invalid     */ case 0xed:	/*/////////////////////////Invalid///////////////////////*/ pc++;				break;
+			/* Invalid     */ case 0xeb:	/*/////////////////////////Invalid////////////////////// */ pc++;				break;
+			/* Invalid     */ case 0xec:	/*/////////////////////////Invalid////////////////////// */ pc++;				break;
+			/* Invalid     */ case 0xed:	/*/////////////////////////Invalid////////////////////// */ pc++;				break;
 			/* XOR d8      */ case 0xee:	xor_a(bus.read_byte(pc + 1));								pc+=2;	cycle(8);	break;
 			/* RST 28H     */ case 0xef:	push(pc);													pc=40;	cycle(16);	break;
 			/* LDH A,(a8)  */ case 0xf0:	regs.a = bus.read_byte(0xff | bus.read_byte(pc + 1));		pc+=2;	cycle(12);	break;
 			/* POP AF      */ case 0xf1:	regs.af = pop();											pc++;	cycle(12);	break;
 			/* LD A,(C)    */ case 0xf2:	regs.a = bus.read_byte(regs.c);								pc++;	cycle(8);	break;
 			/* DI          */ case 0xf3:	interrupt_mode = Disabling;									pc++;	cycle(4);	break;
-			/* Invalid     */ case 0xf4:	/*/////////////////////////Invalid///////////////////////*/ pc++;				break;
+			/* Invalid     */ case 0xf4:	/*/////////////////////////Invalid////////////////////// */ pc++;				break;
 			/* PUSH AF     */ case 0xf5:	push(regs.af);												pc++;	cycle(16);	break;
 			/* OR d8       */ case 0xf6:	or_a(bus.read_byte(pc + 1));								pc++;	cycle(8);	break;
 			/* RST 30H     */ case 0xf7:	push(pc);													pc=48;	cycle(16);	break;
@@ -457,36 +476,59 @@ struct CPU {
 			/* LD SP,HL    */ case 0xf9:	sp = regs.hl;												pc++;	cycle(8);	break;
 			/* LD A,(a16)  */ case 0xfa:	regs.a = bus.read_byte(bus.read_word(pc + 1));				pc+=3;	cycle(16);	break;
 			/* EI          */ case 0xfb:	interrupt_mode = Enabling;									pc++;	cycle(4);	break;
-			/* Invalid     */ case 0xfc:	/*/////////////////////////Invalid///////////////////////*/ pc++;				break;
-			/* Invalid     */ case 0xfd:	/*/////////////////////////Invalid///////////////////////*/ pc++;				break;
+			/* Invalid     */ case 0xfc:	/*/////////////////////////Invalid////////////////////// */ pc++;				break;
+			/* Invalid     */ case 0xfd:	/*/////////////////////////Invalid////////////////////// */ pc++;				break;
 			/* CP d8       */ case 0xfe:	cp(bus.read_byte(pc + 1));									pc+=2;	cycle(8);	break;
 			/* RST 38H     */ case 0xff:	push(pc);													pc=56;	cycle(16);	break;
-		
-						
+
 			// Prefix instructions
 			case 0xcb:
 				instruction = bus.read_byte(++pc);
-				u8* const parameters[]{&regs.b, &regs.c, &regs.d, &regs.e, &regs.h, &regs.l, &bus.read_byte(regs.hl)};
+				u8* const parameters[] = {
+					&regs.b, &regs.c, &regs.d, &regs.e, &regs.h, &regs.l, &bus.read_byte(regs.hl)
+				};
 				u8& parameter = *(parameters[instruction & 0x7]);
 				switch(instruction &= 0xf8) {
-				case 0x00:	rlc(parameter);		break;
-				case 0x08:	rrc(parameter);		break;
-				case 0x10:	rl(parameter);		break;
-				case 0x18:	rr(parameter);		break;
-				case 0x20:	sla(parameter);		break;
-				case 0x28:	sra(parameter);		break;
-				case 0x30:	swap(parameter);	break;
-				case 0x38:	srl(parameter);		break;
-				case 0x40 ... 0x78:	bit((instruction - 0x40) >> 3, parameter);	break;
-				case 0x80 ... 0xb8:	res((instruction - 0x80) >> 3, parameter);	break;
-				case 0xc0 ... 0xf8:	set((instruction - 0xc0) >> 3, parameter);	break;
+					case 0x00:
+						rlc(parameter);
+						break;
+					case 0x08:
+						rrc(parameter);
+						break;
+					case 0x10:
+						rl(parameter);
+						break;
+					case 0x18:
+						rr(parameter);
+						break;
+					case 0x20:
+						sla(parameter);
+						break;
+					case 0x28:
+						sra(parameter);
+						break;
+					case 0x30:
+						swap(parameter);
+						break;
+					case 0x38:
+						srl(parameter);
+						break;
+					case 0x40 ... 0x78:
+						bit((instruction - 0x40) >> 3, parameter);
+						break;
+					case 0x80 ... 0xb8:
+						res((instruction - 0x80) >> 3, parameter);
+						break;
+					case 0xc0 ... 0xf8:
+						set((instruction - 0xc0) >> 3, parameter);
+						break;
 				}
 				pc++;
 			break;
 		}
 	}
 
-	void add_a(u8 value) {
+	void add_a(u8 const value) {
 		u8 new_value = regs.a + value;
 		regs.f.zero = new_value == 0;
 		regs.f.subtract = false;
@@ -494,8 +536,8 @@ struct CPU {
 		regs.f.half_carry = (regs.a & 0xf) + (value & 0xf) > 0xf;
 		regs.a = new_value;
 	}
-	
-	void add_hl(u16 value) {
+
+	void add_hl(u16 const value) {
 		u16 new_value = regs.hl + value;
 		regs.f.zero = new_value == 0;
 		regs.f.subtract = false;
@@ -503,8 +545,8 @@ struct CPU {
 		regs.f.half_carry = (regs.hl & 0xff) + (value & 0xff) > 0xff;
 		regs.hl = new_value;
 	}
-	
-	void add_sp(u16 value) {
+
+	void add_sp(u16 const value) {
 		u16 new_value = sp + value;
 		regs.f.zero = new_value == 0;
 		regs.f.subtract = false;
@@ -512,8 +554,8 @@ struct CPU {
 		regs.f.half_carry = (sp & 0xff) + (value & 0xff) > 0xff;
 		sp = new_value;
 	}
-	
-	void adc_a(u8 value) {
+
+	void adc_a(u8 const value) {
 		u8 new_value = regs.a + value + regs.f.carry;
 		regs.f.zero = new_value == 0;
 		regs.f.subtract = false;
@@ -522,23 +564,23 @@ struct CPU {
 		regs.a = new_value;
 	}
 
-	void sub_a(u8 value) {
+	void sub_a(u8 const value) {
 		u8 new_value = regs.a - value;
 		regs.f.zero = new_value == 0;
 		regs.f.subtract = true;
 		regs.f.carry = value > regs.a;
 		regs.f.half_carry = (value & 0xf) > (regs.a & 0xf);
 		regs.a = new_value;
-	}	
-	
-	void cp(u8 value) {
+	}
+
+	void cp(u8 const value) {
 		regs.f.zero = regs.a == value;
 		regs.f.subtract = true;
 		regs.f.carry = value > regs.a;
 		regs.f.half_carry = (value & 0xf) > (regs.a & 0xf);
-	}	
-	
-	void sbc_a(u8 value) {
+	}
+
+	void sbc_a(u8 const value) {
 		u8 new_value = regs.a - value - regs.f.carry;
 		regs.f.zero = new_value == 0;
 		regs.f.subtract = true;
@@ -547,23 +589,23 @@ struct CPU {
 		regs.a = new_value;
 	}
 
-	void and_a(u8 value) {
+	void and_a(u8 const value) {
 		regs.a &= value;
 		regs.f.zero = !regs.a;
 		regs.f.subtract = false;
 		regs.f.half_carry = true;
 		regs.f.carry = false;
 	}
-	
-	void xor_a(u8 value) {
+
+	void xor_a(u8 const value) {
 		regs.a ^= value;
 		regs.f.zero = !regs.a;
 		regs.f.subtract = false;
 		regs.f.half_carry = false;
 		regs.f.carry = false;
 	}
-	
-	void or_a(u8 value) {
+
+	void or_a(u8 const value) {
 		regs.a |= value;
 		regs.f.zero = !regs.a;
 		regs.f.subtract = false;
@@ -578,7 +620,7 @@ struct CPU {
 		regs.a <<= 1;
 		regs.f.zero = regs.a == 0;
 	}
-	
+
 	void rrca() {
 		regs.f.subtract = false;
 		regs.f.half_carry = false;
@@ -588,7 +630,7 @@ struct CPU {
 	}
 
 	void ldhlspr8() {
-		i8 n = *(i8*)&bus.read_byte(pc + 1);
+		i8 n = *reinterpret_cast<i8*>(&bus.read_byte(pc + 1));
 		regs.hl = sp + n;
 		regs.f.zero = false;
 		regs.f.subtract = false;
@@ -596,7 +638,7 @@ struct CPU {
 		regs.f.carry = (sp & 0xff) + (n & 0xff) > 0xff;
 	}
 
-	void push(u16 value) {
+	void push(u16 const value) {
 		bus.write_word(sp -= 2, value);
 	}
 
@@ -650,7 +692,7 @@ struct CPU {
 	}
 
 	void ccf() {
-		regs.f.carry = ~regs.f.carry;
+		regs.f.carry = !regs.f.carry;
 		regs.f.half_carry = false;
 		regs.f.subtract = false;
 	}
@@ -662,15 +704,17 @@ struct CPU {
 	}
 
 	void inc_byte(u8& value) {
-		regs.f.zero = !++value;
+		value++;
+		regs.f.zero = !value;
 		regs.f.subtract = false;
-		regs.f.half_carry = !(value & 0xf);
+		regs.f.half_carry = (value & 0xf) == 0;
 	}
-	
+
 	void dec_byte(u8& value) {
-		regs.f.zero = !--value;
+		value--;
+		regs.f.zero = !value;
 		regs.f.subtract = true;
-		regs.f.half_carry = !~(value & 0xf);
+		regs.f.half_carry = (value & 0xf) == 0xf;
 	}
 
 	void call() {
@@ -697,7 +741,7 @@ struct CPU {
 		regs.f.half_carry = false;
 		regs.f.zero = !value;
 	}
-	
+
 	void rl(u8& value) {
 		bool temp = regs.f.carry;
 		regs.f.carry = value >> 7;
@@ -706,7 +750,7 @@ struct CPU {
 		regs.f.half_carry = false;
 		regs.f.zero = !value;
 	}
-	
+
 	void rr(u8& value) {
 		bool temp = regs.f.carry;
 		regs.f.carry = value;
@@ -715,7 +759,7 @@ struct CPU {
 		regs.f.half_carry = false;
 		regs.f.zero = !value;
 	}
-	
+
 	void sla(u8& value) {
 		regs.f.carry = value & 0x80;
 		value <<= 1;
@@ -723,7 +767,7 @@ struct CPU {
 		regs.f.half_carry = false;
 		regs.f.zero = !value;
 	}
-	
+
 	void sra(u8& value) {
 		regs.f.carry = value;
 		value = (value & 0x80) | value >> 1;
@@ -731,7 +775,7 @@ struct CPU {
 		regs.f.half_carry = false;
 		regs.f.zero = !value;
 	}
-	
+
 	void swap(u8& value) {
 		value = ((value & 0xf0) >> 4) | ((value & 0x0f) << 4);
 		regs.f.subtract = false;
@@ -739,7 +783,7 @@ struct CPU {
 		regs.f.carry = false;
 		regs.f.zero = !value;
 	}
-	
+
 	void srl(u8& value) {
 		regs.f.carry = value;
 		value >>= 1;
@@ -747,29 +791,29 @@ struct CPU {
 		regs.f.half_carry = false;
 		regs.f.zero = !value;
 	}
-	
-	void bit(u8 b, u8 value) {
+
+	void bit(u8 const b, u8 value) {
 		regs.f.zero = !(value >> b & 0x1);
 		regs.f.subtract = false;
 		regs.f.half_carry = true;
 	}
-	
-	void res(u8 b, u8& value) { value &= ~((u8)0x01 << b); }
-	
-	void set(u8 b, u8& value) { value |= 1 << b; }
+
+	void res(u8 const b, u8& value) {
+		value &= ~((u8)0x01 << b);
+	}
+
+	void set(u8 const b, u8& value) {
+		value |= 1 << b;
+	}
 };
-
-
-
-
 
 int main() {
 	CPU cpu;
-	
-	memset(cartridge_memory, 0, sizeof(cartridge_memory));
+
+	memset(cartridge_memory.data(), 0, sizeof(cartridge_memory));
 	FILE *in;
 	in = fopen( "Tetris.gb", "rb" );
-	fread(cartridge_memory, 1, 0x200000, in);
+	fread(cartridge_memory.data(), 1, 0x200000, in);
 	fclose(in);
 
 	sf::RenderWindow window(sf::VideoMode(800, 720), "Gameboy Emulator");
@@ -786,7 +830,7 @@ int main() {
 			if(event.type == sf::Event::Closed)
 				window.close();
 		}
-		
+
 		cpu.run_frame();
 
 		texture.update(frame_buffer);

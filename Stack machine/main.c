@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-enum opcode { HLT, LDC, ADD, SUB, MUL, DIV, POP, DUP, SWP, DSP, JMP, JSR, RET, JEZ, JNZ, JGZ, JLZ, INC, DEC, SHL, SHR };
+enum Opcode { HLT, LDC, ADD, SUB, MUL, DIV, POP, DUP, SWP, DSP, JMP, JSR, RET, JEZ, JNZ, JGZ, JLZ, INC, DEC, SHL, SHR };
 
 const int32_t program[] = {
 	LDC, 10,

@@ -8,7 +8,7 @@
 
 #define TILE_SIZE 16
 
-#define SCREEN_WIDTH ((BOARD_WIDTH + 8) * TILE_SIZE)
+#define SCREEN_WIDTH ((BOARD_WIDTH + 7) * TILE_SIZE)
 #define SCREEN_HEIGHT ((BOARD_HEIGHT - HIDDEN_ROWS + 2) * TILE_SIZE)
 
 #define MAX_DENSITY 20 /* Used for randomizeBoard() */
