@@ -129,4 +129,5 @@ public:
 	void step() noexcept;
 
 	Mos6502() noexcept;
+	virtual ~Mos6502() noexcept;
 };

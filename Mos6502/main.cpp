@@ -1,6 +1,6 @@
 #include "mos6502.hpp"
 
-class MyMos6502 : Mos6502 {
+class MyMos6502 : public Mos6502 {
 	uint8_t readByte(uint16_t const address) const noexcept override {
 		return memory[address];
 	}
@@ -10,13 +10,13 @@ class MyMos6502 : Mos6502 {
 	}
 
 public:
-	using Mos6502::Mos6502;
-
 	uint8_t memory[65536] = {0};
 };
 
 int main() {
-	MyMos6502 cpu;
+	Mos6502 *cpu = new MyMos6502;
+
+	delete cpu;
 
 	return 0;
 }
