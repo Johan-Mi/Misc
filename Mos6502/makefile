@@ -1,4 +1,4 @@
-CFLAGS = -std=c++17 -g -Wall -fconcepts
+CFLAGS = -std=c++2a -g -Wall -fconcepts
 
 main: main.o mos6502.o
 	g++ $(CFLAGS) -o main main.o mos6502.o

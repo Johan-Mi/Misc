@@ -15,7 +15,7 @@ void drawGhost(Board, Piece);
 SDL_Surface* tileAtlas = NULL;
 SDL_Surface* screen = NULL;
 
-int speed = 40;
+int speed = 20;
 
 u8 bag = 0;
 

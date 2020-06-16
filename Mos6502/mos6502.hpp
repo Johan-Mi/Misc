@@ -7,10 +7,10 @@ class Mos6502 {
 		struct {
 			bool N : 1; // Negative/sign
 			bool V : 1; // Overflow
-			bool _ : 1; // Unused
-			bool B : 1; // ?
-			bool D : 1; // Decimal
-			bool I : 1; // Interrupt disable
+			bool _ : 1 = 1; // Unused
+			bool B : 1 = 1; // ?
+			bool D : 1 = 0; // Decimal
+			bool I : 1 = 1; // Interrupt disable
 			bool Z : 1; // Zero
 			bool C : 1; // Carry
 		};
@@ -28,7 +28,7 @@ class Mos6502 {
 	uint8_t Y;
 	Flags flags;
 	uint16_t PC;
-	uint8_t S;
+	uint8_t S = 0xff;
 
 	constexpr uint8_t read(uint8_t const location) const noexcept;
 	uint8_t read(MemLocation const location) const noexcept;

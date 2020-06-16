@@ -263,10 +263,12 @@ void Mos6502::sendIrq() noexcept {
 }
 
 uint8_t Mos6502::readByte(uint16_t const addresss) const noexcept {
-	return 0;
+	std::cerr << "readByte()' has to be overridden in a derived class\n";
+	exit(1);
 }
 void Mos6502::writeByte(uint16_t address, uint8_t const value) noexcept {
-
+	std::cerr << "writeByte() has to be overridden in a derived class\n";
+	exit(1);
 }
 
 uint16_t Mos6502::readWord(uint16_t const address) const noexcept {
@@ -289,7 +291,7 @@ void Mos6502::pushWord(uint16_t const value) noexcept {
 	pushByte(value);
 }
 uint16_t Mos6502::popWord() noexcept {
-	return popByte() | static_cast<uint16_t>(popByte()) >> 8;
+	return popByte() | static_cast<uint16_t>(popByte()) << 8;
 }
 
 [[nodiscard]] Mos6502::MemLocation Mos6502::opImm() const noexcept {
