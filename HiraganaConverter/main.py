@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-romaji = input('String to convert: ').lower()
-
-hiragana = ''
-
 converter = (
     ('gya', 'ぎゃ'),
     ('gyu', 'ぎゅ'),
@@ -20,7 +16,6 @@ converter = (
     ('pya', 'ぴゃ'),
     ('pyu', 'ぴゅ'),
     ('pyo', 'ぴょ'),
-
     ('kya', 'きゃ'),
     ('kyu', 'きゅ'),
     ('kyo', 'きょ'),
@@ -42,7 +37,6 @@ converter = (
     ('rya', 'りゃ'),
     ('ryu', 'りゅ'),
     ('ryo', 'りょ'),
-
     ('ga', 'が'),
     ('gi', 'ぎ'),
     ('gu', 'ぐ'),
@@ -68,7 +62,6 @@ converter = (
     ('pu', 'ぷ'),
     ('pe', 'ぺ'),
     ('po', 'ぽ'),
-
     ('a', 'あ'),
     ('i', 'い'),
     ('u', 'う'),
@@ -115,7 +108,6 @@ converter = (
     ('wa', 'わ'),
     ('wo', 'を'),
     ('n', 'ん'),
-
     ('...', '…'),
     ('..', '‥'),
     ('.', '。'),
@@ -133,19 +125,27 @@ converter = (
     ('?', '？'),
 )
 
-validChars = 'abcdefghijklmnopqrstuvwxyz .,{}()[]~:?!'
+VALID_CHARS = 'abcdefghijklmnopqrstuvwxyz .,{}()[]~:?!'
 
-while romaji:
-    if romaji[0] not in validChars:
-        hiragana += romaji[0]
-        romaji = romaji[1:]
-    for i, j in converter:
-        if romaji.startswith(i):
-            hiragana += j
-            romaji = romaji[len(i):]
+def main():
+    romaji = input('String to convert: ').lower()
+
+    hiragana = ''
+
+    while romaji:
+        if romaji[0] not in VALID_CHARS:
+            hiragana += romaji[0]
+            romaji = romaji[1:]
+        for i, j in converter:
+            if romaji.startswith(i):
+                hiragana += j
+                romaji = romaji[len(i):]
+                break
+        else:
+            print('Translation failed')
             break
     else:
-        print('Translation failed')
-        break
-else:
-    print(hiragana)
+        print(hiragana)
+
+if __name__ == "__main__":
+    main()

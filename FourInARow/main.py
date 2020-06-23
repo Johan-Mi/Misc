@@ -1,31 +1,27 @@
 #!/usr/bin/env python3
 
-Empty = 0
-Red = 1
-White = 2
-Full = 3
+EMPTY = 0
+RED = 1
+WHITE = 2
+FULL = 3
 
-board = []
-for _ in range(7):
-    board.append([Empty] * 6)
 
-turn = White
-
-def printBoard():
+def print_board(board):
     print('\033[0m\033[2J\033[3J\033[;H┌───────┐')
     for i in range(6):
         print('│', end='')
         for j in range(7):
-            if board[j][i] == Empty:
+            if board[j][i] == EMPTY:
                 print('\033[0m◯', end='')
-            elif board[j][i] == Red:
+            elif board[j][i] == RED:
                 print('\033[31m●', end='')
             else:
                 print('\033[37m●', end='')
         print('\033[0m│')
     print('└1234567┘\n')
 
-def checkWin(t):
+
+def check_win(board, t):
     for i in range(6):
         for j in range(4):
             if all((board[j + k][i] == t for k in range(4))):
@@ -38,32 +34,45 @@ def checkWin(t):
             if all((board[j + k][i     + k] == t for k in range(4))) \
             or all((board[j + k][i + 3 - k] == t for k in range(4))):
                 return t
-    if not any([Empty in i for i in board]):
-        return Full
+    if not any([EMPTY in i for i in board]):
+        return FULL
+    return None
 
-while True:
-    printBoard()
+
+def main():
+    board = []
+    for _ in range(7):
+        board.append([EMPTY] * 6)
+
+    turn = WHITE
 
     while True:
-        try:
-            x = int(input('Red: ' if turn == Red else 'White: '))
-            if x > 0 and x < 8:
-                x -= 1
-                if board[x][0] == Empty:
-                    y = 0
-                    while y < 5 and board[x][y + 1] == Empty:
-                        y += 1
-                    board[x][y] = turn
-                    break
-        except ValueError:
-            pass
-    res = checkWin(turn)
-    if res == turn:
-        printBoard()
-        print('Red won!' if turn == Red else 'White won!')
-        break
-    elif res == Full:
-        printBoard()
-        print('Draw!')
-        break
-    turn = Red if turn == White else White
+        print_board(board)
+
+        while True:
+            try:
+                x = int(input('RED: ' if turn == RED else 'WHITE: '))
+                if 0 < x < 8:
+                    x -= 1
+                    if board[x][0] == EMPTY:
+                        y = 0
+                        while y < 5 and board[x][y + 1] == EMPTY:
+                            y += 1
+                        board[x][y] = turn
+                        break
+            except ValueError:
+                pass
+        res = check_win(board, turn)
+        if res == turn:
+            print_board(board)
+            print('RED won!' if turn == RED else 'WHITE won!')
+            break
+        if res == FULL:
+            print_board(board)
+            print('Draw!')
+            break
+        turn = RED if turn == WHITE else WHITE
+
+
+if __name__ == "__main__":
+    main()
