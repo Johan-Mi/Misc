@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from lark import Lark, Transformer
 from enum import Enum
 from copy import deepcopy
+from lark import Lark, Transformer
+
 
 class NodeType(Enum):
     Ident = 0
@@ -12,44 +13,26 @@ class NodeType(Enum):
     Undef = 4
     Import = 5
 
-grammar = '''
-    ?start          : expr
-                    | assignment
-                    | undef
-                    | import
-    ?assignment     : ident "=" expr -> assignment
-    ?undef          : "undef" ident -> undef
-    ?import         : "import" /.+/ -> import_
-    ?expr           : appl_expr
-                    | application
-    ?lambda         : "lambda" ident "." expr -> lambda_
-    ?application    : application_
-    ?appl_expr      : lambda
-                    | ident
-                    | "(" expr ")"
-    ?application_   : appl_expr appl_expr -> application
-                    | application_ appl_expr -> application
-    ?ident          : /[a-z_A-Z][a-z_A-Z0-9]*/ -> ident
 
-    %import common.WS_INLINE
-    %ignore WS_INLINE
-'''
 
 class LambdaTransformer(Transformer):
-    lambda_        = lambda args: [NodeType.Lambda, args[0], args[1]]
-    application    = lambda args: [NodeType.Application, args[0], args[1]]
-    ident          = lambda args: [NodeType.Ident, str(args[0])]
-    assignment     = lambda args: [NodeType.Assignment, args[0], args[1]]
-    undef          = lambda args: [NodeType.Undef, args[0]]
-    import_        = lambda args: [NodeType.Import, args[0]]
+    lambda_ = lambda args: [NodeType.Lambda, args[0], args[1]]
+    application = lambda args: [NodeType.Application, args[0], args[1]]
+    ident = lambda args: [NodeType.Ident, str(args[0])]
+    assignment = lambda args: [NodeType.Assignment, args[0], args[1]]
+    undef = lambda args: [NodeType.Undef, args[0]]
+    import_ = lambda args: [NodeType.Import, args[0]]
+
 
 def expr_to_str(expr):
     if expr[0] == NodeType.Lambda:
-        return 'λ%s.%s' % (expr_to_str(expr[1]), expr_to_str(expr[2]))
-    elif expr[0] == NodeType.Application:
-        return '%s %s' % (expr_to_str(expr[1]), expr_to_str(expr[2]))
-    elif expr[0] == NodeType.Ident:
+        return "λ%s.%s" % (expr_to_str(expr[1]), expr_to_str(expr[2]))
+    if expr[0] == NodeType.Application:
+        return "%s %s" % (expr_to_str(expr[1]), expr_to_str(expr[2]))
+    if expr[0] == NodeType.Ident:
         return expr[1]
+    return ""
+
 
 def apply(expr, var, value):
     if expr[0] == NodeType.Application:
@@ -61,6 +44,7 @@ def apply(expr, var, value):
             apply(expr[2], var, value)
     elif expr[0] == NodeType.Ident and expr[1] == var[1]:
         expr[:] = deepcopy(value)
+
 
 def reduce(expr):
     if expr[0] == NodeType.Lambda:
@@ -81,67 +65,60 @@ def reduce(expr):
         if expr[1] in variables:
             expr[:] = deepcopy(variables[expr[1]])
 
-def evalStmt(stmt):
+
+def eval_stmt(stmt):
     if len(stmt) == 0:
-        return
+        return ""
     result = parser.parse(stmt)
     if result[0] == NodeType.Undef:
         del variables[result[1][1]]
     elif result[0] == NodeType.Import:
-        with open('lib/' + result[1]) as f:
-            for line in f.readlines():
-                evalStmt(line.replace('\n', ''))
+        with open("lib/" + result[1]) as lib_file:
+            for line in lib_file.readlines():
+                eval_stmt(line.replace("\n", ""))
     else:
         reduce(result)
         return expr_to_str(result)
+    return ""
 
-parser = Lark(grammar, parser='lalr', transformer=LambdaTransformer)
+
+parser = Lark.open("grammar.lark", parser="lalr", transformer=LambdaTransformer)
 
 variables = {}
 
-tests = [
-    ('x', 'x'),
-    ('x y', 'x y'),
-    ('lambda x.y', 'λx.y'),
-    ('lambda x.lambda y.x y', 'λx.λy.x y'),
-    ('(lambda x.y x) z', 'y z'),
-    ('(lambda x.x x) lambda y.y', 'λy.y')]
-testNumber = 0
-runTests = True
+tests = [("x", "x"), ("x y", "x y"), ("lambda x.y", "λx.y"),
+         ("lambda x.lambda y.x y", "λx.λy.x y"), ("(lambda x.y x) z", "y z"),
+         ("(lambda x.x x) lambda y.y", "λy.y")]
+RUN_TESTS = True
 
-stddefs = (
-    'I=lambda x.x',
-    'K=lambda x.lambda y.x',
-    'KI=lambda x.lambda y.y',
-    'M=lambda f.f f',
-    'C=lambda f.lambda a.lambda b.f b a')
+def main():
+    test_number = 0
+    while True:
+        if RUN_TESTS and tests:
+            is_test = True
+            in_expr, expected = tests.pop(0)
+            print(f"Test {test_number}> {in_expr}")
+            test_number += 1
+        else:
+            is_test = False
+            in_expr = input("> ")
+            if in_expr.lower() in ("q", "quit", "exit"):
+                break
+        try:
+            result = eval_stmt(in_expr)
+            if result:
+                print(result)
+            if is_test:
+                if result == expected:
+                    print("\033[32mPassed ✓\033[0m")
+                else:
+                    print("\033[31mFailed X\033[0m")
+                    print(f"Expected: {expected}")
+        except RecursionError:
+            print("\033[31mError: infinite loop\033[0m")
+        except Exception as err:
+            #print("\033[31mError: invalid syntax\033[0m")
+            print(err)
 
-#for d in stddefs:
-    #evalStmt(d);
-
-while True:
-    if runTests and tests:
-        isTest = True
-        inExpr, expected = tests.pop(0)
-        print('Test %d> %s' % (testNumber, inExpr))
-        testNumber += 1
-    else:
-        isTest = False
-        inExpr = input('> ')
-        if inExpr.lower() in ('q', 'quit', 'exit'):
-            break
-    try:
-        result = evalStmt(inExpr)
-        if result:
-            print(result)
-        if isTest:
-            if result == expected:
-                print('\033[32mPassed ✓\033[0m')
-            else:
-                print('\033[31mFailed X\033[0m')
-                print('Expected: %s' % expected)
-    except RecursionError:
-        print('\033[31mError: infinite loop\033[0m')
-    except Exception as e:
-        #print('\033[31mError: invalid syntax\033[0m')
-        print(e)
+if __name__ == "__main__":
+    main()
