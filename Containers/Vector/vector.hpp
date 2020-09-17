@@ -10,7 +10,7 @@ class vector {
 
 	vector() {}
 	vector(size_t count, const T& value = T())
-		:	capacity(count), size(count), ptr(new T[count]);
+		:	capacity(count), size(count), ptr(new T[count])
 	{
 		for(size_t i = 0; i < count; i++)
 			ptr[i] = value;
@@ -31,7 +31,7 @@ class vector {
 	vector(std::initializer_list<T> init)
 		:	capacity(init.size()), size(init.size()), ptr(new T[init.size()])	
 	{
-		for(size_t i = 0; i < capacity; i++;) 
+		for(size_t i = 0; i < capacity; i++) 
 			ptr[i] = init[i];
 	}
 
@@ -69,6 +69,6 @@ class vector {
 			delete[] ptr;
 			ptr = new T[capacity];	
 		}	
-		ptr[size++] = T(std::forward<Args>(args));
+		ptr[size++] = T(std::forward<Args>(args)...);
 	}
 };

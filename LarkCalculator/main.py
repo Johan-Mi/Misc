@@ -1,51 +1,52 @@
 #!/usr/bin/env python3
+"""Reads mathematical expressions from stdin and evaluates them."""
 
 from lark import Lark, Transformer
 
-grammar = '''
-		start		: expr -> get_num
-		expr		: add -> get_num
-					| sub -> get_num
-					| mul -> get_num
-					| div -> get_num
-					| num -> num_literal
-		num			: "(" expr ")" -> get_num
-					| NUMBER -> num_literal
-					| negate -> get_num
-		add			: expr "+" expr -> add_expr
-		sub			: expr "-" expr -> sub_expr
-		mul			: num "*" num -> mul_expr
-		div			: num "/" num -> div_expr
-		negate		: "-" num -> negate_expr
 
-		%import common.NUMBER
-		%ignore " "
-	'''
+class CalcTransformer(Transformer):  # pylint: disable=too-few-public-methods
+    """Transformer for the parser."""
+    @staticmethod
+    def _num(args):
+        return float(args[0])
 
-class CalcTransformer(Transformer):
-	def get_num(self, args):
-		return args[0]
-	def num_literal(self, args):
-		return float(args[0])
-	def add_expr(self, args):
-		return float(args[0]) + float(args[1])
-	def sub_expr(self, args):
-		return float(args[0]) - float(args[1])
-	def mul_expr(self, args):
-		return float(args[0]) * float(args[1])
-	def div_expr(self, args):
-		return float(args[0]) / float(args[1])
-	def negate_expr(self, args):
-		return -args[0]
+    @staticmethod
+    def _add(args):
+        return float(args[0]) + float(args[1])
 
-parser = Lark(grammar, parser='lalr', transformer=CalcTransformer())
+    @staticmethod
+    def _sub(args):
+        return float(args[0]) - float(args[1])
 
-try:
-	result = parser.parse(input('> '))
-	if result == int(result):
-		result = int(result)
-	print(result)
-except ZeroDivisionError:
-	print('Tried to divide by zero!')
-except:
-	print('Syntax error!')
+    @staticmethod
+    def _mul(args):
+        return float(args[0]) * float(args[1])
+
+    @staticmethod
+    def _div(args):
+        return float(args[0]) / float(args[1])
+
+    @staticmethod
+    def _negate(args):
+        return -args[0]
+
+
+def main():
+    """Creates a parser and uses it to evaluate stdin."""
+    parser = Lark.open("grammar.lark",
+                       parser='lalr',
+                       transformer=CalcTransformer())
+
+    try:
+        result = parser.parse(input('> '))
+        if result == int(result):
+            result = int(result)
+        print(result)
+    except ZeroDivisionError:
+        print('Tried to divide by zero!')
+    except:
+        print('Syntax error!')
+
+
+if __name__ == "__main__":
+    main()
