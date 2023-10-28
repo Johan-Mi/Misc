@@ -1,13 +1,31 @@
 #pragma once
 
 typedef enum {
-	O,
-	I1, I2, I3, I4,
-	T1, T2, T3, T4,
-	J1, J2, J3, J4,
-	L1, L2, L3, L4,
-	S1, S2, S3, S4,
-	Z1, Z2, Z3, Z4,
+    O,
+    I1,
+    I2,
+    I3,
+    I4,
+    T1,
+    T2,
+    T3,
+    T4,
+    J1,
+    J2,
+    J3,
+    J4,
+    L1,
+    L2,
+    L3,
+    L4,
+    S1,
+    S2,
+    S3,
+    S4,
+    Z1,
+    Z2,
+    Z3,
+    Z4,
 } Shape;
 
 /*

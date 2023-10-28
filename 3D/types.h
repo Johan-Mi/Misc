@@ -1,20 +1,20 @@
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 typedef struct {
-	float x, y, z;
+    float x, y, z;
 } Float3d;
 
 typedef struct {
-	float x, y, z;
-	float rx, ry;
+    float x, y, z;
+    float rx, ry;
 } Camera;
 
 typedef struct {
-	float r, g, b;
+    float r, g, b;
 } Rgb;
 
 typedef struct {
-	size_t p1, p2, p3;
-	Rgb color;
+    size_t p1, p2, p3;
+    Rgb color;
 } Tri;
