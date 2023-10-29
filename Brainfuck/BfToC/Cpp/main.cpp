@@ -36,15 +36,17 @@ int main() {
                    program[pc] != ',' && program[pc] != '.' &&
                    program[pc] != '[' && program[pc] != ']' &&
                    pc < program.length() - 1) {
-                if (program[pc] == '+')
+                if (program[pc] == '+') {
                     changeAmount++;
-                else if (program[pc] == '-')
+                } else if (program[pc] == '-') {
                     changeAmount--;
+                }
                 pc++;
             }
             pc--;
-            if (changeAmount)
+            if (changeAmount) {
                 output.push_back({Inc, changeAmount});
+            }
         } break;
         case '>':
         case '<': {
@@ -52,15 +54,17 @@ int main() {
             while (program[pc] != '+' && program[pc] != '-' &&
                    program[pc] != ',' && program[pc] != '.' &&
                    program[pc] != '[' && program[pc] != ']') {
-                if (program[pc] == '>')
+                if (program[pc] == '>') {
                     changeAmount++;
-                else if (program[pc] == '<')
+                } else if (program[pc] == '<') {
                     changeAmount--;
+                }
                 pc++;
             }
             pc--;
-            if (changeAmount)
+            if (changeAmount) {
                 output.push_back({Move, changeAmount});
+            }
         } break;
         case '[':
             output.push_back({LoopBegin});
@@ -84,10 +88,12 @@ int main(void) {
 
 )";
     for (unsigned i = 0; i < output.size(); i++) {
-        if (output[i].type == LoopEnd)
+        if (output[i].type == LoopEnd) {
             indentation--;
-        for (unsigned j = 0; j < indentation; j++)
+        }
+        for (unsigned j = 0; j < indentation; j++) {
             outputFile << '\t';
+        }
         switch (output[i].type) {
         case Output:
             outputFile << "putchar(memory[ptr]);";
@@ -96,24 +102,26 @@ int main(void) {
             outputFile << "memory[ptr] = getchar();\n";
             break;
         case Inc:
-            if (output[i].value == 1)
+            if (output[i].value == 1) {
                 outputFile << "memory[ptr]++;\n";
-            else if (output[i].value == -1)
+            } else if (output[i].value == -1) {
                 outputFile << "memory[ptr]--;\n";
-            else if (output[i].value > 0)
+            } else if (output[i].value > 0) {
                 outputFile << "memory[ptr] += " << output[i].value << ";\n";
-            else if (output[i].value < 0)
+            } else if (output[i].value < 0) {
                 outputFile << "memory[ptr] -= " << -output[i].value << ";\n";
+            }
             break;
         case Move:
-            if (output[i].value == 1)
+            if (output[i].value == 1) {
                 outputFile << "ptr++;\n";
-            else if (output[i].value == -1)
+            } else if (output[i].value == -1) {
                 outputFile << "ptr--;\n";
-            else if (output[i].value > 0)
+            } else if (output[i].value > 0) {
                 outputFile << "ptr += " << output[i].value << ";\n";
-            else if (output[i].value < 0)
+            } else if (output[i].value < 0) {
                 outputFile << "ptr -= " << -output[i].value << ";\n";
+            }
             break;
         case LoopBegin:
             outputFile << "while(memory[ptr]) {\n";

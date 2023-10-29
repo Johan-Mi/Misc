@@ -10,14 +10,16 @@ template <class T> class vector {
     vector() {}
     vector(size_t count, const T &value = T())
         : capacity(count), size(count), ptr(new T[count]) {
-        for (size_t i = 0; i < count; i++)
+        for (size_t i = 0; i < count; i++) {
             ptr[i] = value;
+        }
     }
     vector(const vector &other)
         : capacity(other.capacity), size(other.size),
           ptr(new T[other.capacity]) {
-        for (size_t i = 0; i < size; i++)
+        for (size_t i = 0; i < size; i++) {
             ptr[i] = other.ptr[i];
+        }
     }
     vector(vector &&other)
         : capacity(other.capacity), size(other.size), ptr(other.ptr) {
@@ -27,8 +29,9 @@ template <class T> class vector {
     }
     vector(std::initializer_list<T> init)
         : capacity(init.size()), size(init.size()), ptr(new T[init.size()]) {
-        for (size_t i = 0; i < capacity; i++)
+        for (size_t i = 0; i < capacity; i++) {
             ptr[i] = init[i];
+        }
     }
 
     ~vector() {
@@ -36,8 +39,9 @@ template <class T> class vector {
     }
 
     T &at(size_t index) {
-        if (index < 0 || index >= capacity)
+        if (index < 0 || index >= capacity) {
             throw std::out_of_range;
+        }
         return ptr[index];
     }
 

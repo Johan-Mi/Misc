@@ -68,14 +68,16 @@ i8 const wallKicks[16][5][2] = {
 
 void tryMoveLeft(Board board, Piece *piece) {
     piece->x--;
-    if (pieceCollides(board, *piece))
+    if (pieceCollides(board, *piece)) {
         piece->x++;
+    }
 }
 
 void tryMoveRight(Board board, Piece *piece) {
     piece->x++;
-    if (pieceCollides(board, *piece))
+    if (pieceCollides(board, *piece)) {
         piece->x--;
+    }
 }
 
 void tryMoveDown(Board board, Piece *piece, Piece *nextPiece) {
@@ -88,8 +90,9 @@ void tryMoveDown(Board board, Piece *piece, Piece *nextPiece) {
 
 void tryMoveUp(Board board, Piece *piece) {
     piece->y--;
-    if (pieceCollides(board, *piece))
+    if (pieceCollides(board, *piece)) {
         piece->y++;
+    }
 }
 
 void tryRotLeft(Board board, Piece *piece) {
@@ -248,9 +251,10 @@ bool pieceCollides(Board board, Piece piece) {
 
 void placePiece(Board board, Piece *piece, Piece *nextPiece) {
     u8 color = colorOfPiece(*piece);
-    for (u8 i = 0; i < 4; i++)
+    for (u8 i = 0; i < 4; i++) {
         board[(u8)(piece->y + tileCoordinates[piece->shape][i][1])]
              [(u8)(piece->x + tileCoordinates[piece->shape][i][0])] = color;
+    }
     *piece = *nextPiece;
     *nextPiece = randomPiece();
     clearFullRows(board);
@@ -276,8 +280,9 @@ u8 colorOfPiece(Piece piece) {
 Piece randomPiece(void) {
     extern u8 bag;
 
-    if (bag == 0)
+    if (bag == 0) {
         bag = (1 << 7) - 1;
+    }
 
     for (;;) {
         u8 p = rand() % 7;

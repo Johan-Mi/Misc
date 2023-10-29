@@ -131,7 +131,8 @@ void (*const functions[])() = {
     [SHR] = shr};
 
 int main(void) {
-    while (ip < sizeof(program) / sizeof(*program))
+    while (ip < sizeof(program) / sizeof(*program)) {
         functions[program[ip]]();
+    }
     return EXIT_SUCCESS;
 }

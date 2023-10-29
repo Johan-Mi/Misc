@@ -108,19 +108,24 @@ int main(void) {
             }
         }
 
-        if (keys[SDL_SCANCODE_L])
+        if (keys[SDL_SCANCODE_L]) {
             cam.ry += TURN_SPEED * deltaTime;
-        if (keys[SDL_SCANCODE_H])
+        }
+        if (keys[SDL_SCANCODE_H]) {
             cam.ry -= TURN_SPEED * deltaTime;
-        if (keys[SDL_SCANCODE_K])
+        }
+        if (keys[SDL_SCANCODE_K]) {
             cam.rx -= TURN_SPEED * deltaTime;
-        if (keys[SDL_SCANCODE_J])
+        }
+        if (keys[SDL_SCANCODE_J]) {
             cam.rx += TURN_SPEED * deltaTime;
+        }
 
-        if (cam.rx < -M_PI_2)
+        if (cam.rx < -M_PI_2) {
             cam.rx = -M_PI_2;
-        else if (cam.rx > M_PI_2)
+        } else if (cam.rx > M_PI_2) {
             cam.rx = M_PI_2;
+        }
 
         if (keys[SDL_SCANCODE_W]) {
             cam.z += MOVE_SPEED * sinf(cam.ry) * deltaTime;
@@ -138,10 +143,12 @@ int main(void) {
             cam.z += MOVE_SPEED * cosf(cam.ry) * deltaTime;
             cam.x -= MOVE_SPEED * sinf(cam.ry) * deltaTime;
         }
-        if (keys[SDL_SCANCODE_E])
+        if (keys[SDL_SCANCODE_E]) {
             cam.y += MOVE_SPEED * deltaTime;
-        if (keys[SDL_SCANCODE_Q])
+        }
+        if (keys[SDL_SCANCODE_Q]) {
             cam.y -= MOVE_SPEED * deltaTime;
+        }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -192,8 +199,9 @@ int main(void) {
         glBegin(GL_POINTS);
         for (size_t i = 0; i < numPoints; i++) {
             Float3d dp = viewTransform(&points[i]);
-            if (dp.z > 0.0f)
+            if (dp.z > 0.0f) {
                 glVertex2f(dp.x, dp.y * SCREEN_WIDTH / SCREEN_HEIGHT);
+            }
         }
         glEnd();
 #endif
@@ -221,8 +229,9 @@ Float3d viewTransform(Float3d const *const p) {
     z = z2 * cosf(cam.rx) - y * sinf(cam.rx);
     y = z2 * sinf(cam.rx) + y * cosf(cam.rx);
 
-    if (z == 0.0f)
+    if (z == 0.0f) {
         z = 0.0000001f;
+    }
     x /= z;
     y /= z;
 
@@ -232,13 +241,16 @@ Float3d viewTransform(Float3d const *const p) {
 bool zClipLine(Float3d *p1, Float3d *p2) {
     float f;
 
-    if (p1->z > 0.0f && p2->z > 0.0f)
+    if (p1->z > 0.0f && p2->z > 0.0f) {
         return true;
-    if (p1->z <= 0.0f && p2->z <= 0.0f)
+    }
+    if (p1->z <= 0.0f && p2->z <= 0.0f) {
         return false;
+    }
 
-    if (p2->z <= 0.0f)
+    if (p2->z <= 0.0f) {
         SWAP(p1, p2)
+    }
 
     f = p1->z / (p2->z - p1->z);
     *p1 = (Float3d
@@ -264,10 +276,11 @@ bool zClipTri(Float3d *p1, Float3d *p2, Float3d *p3, Float3d *p4) {
         }
         return true;
     case 2: {
-        if (p2->z <= 0.0f)
+        if (p2->z <= 0.0f) {
             SWAP(*p1, *p2)
-        else if (p3->z <= 0.0f)
+        } else if (p3->z <= 0.0f) {
             SWAP(*p1, *p3)
+        }
 
         *p4 = *p1;
         zClipLine(p2, p1);

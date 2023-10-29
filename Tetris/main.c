@@ -115,12 +115,15 @@ int main(void) {
 
         if (!paused) {
             timer++;
-            if (!(timer % speed))
+            if (!(timer % speed)) {
                 tryMoveDown(board, &piece, &nextPiece);
+            }
 
-            for (u8 i = 0; i < 4; i++)
-                for (u8 j = 0; j < 4; j++)
+            for (u8 i = 0; i < 4; i++) {
+                for (u8 j = 0; j < 4; j++) {
                     drawTile(0, BOARD_WIDTH + i + 2, j + 1);
+                }
+            }
             drawPiece(nextPiece, 8, 1);
 
             drawBoard(board);
@@ -160,8 +163,9 @@ void drawPiece(Piece piece, u8 xOffset, u8 yOffset) {
     for (u8 i = 0; i < 4; i++) {
         u8 x = xOffset + piece.x + tileCoordinates[piece.shape][i][0];
         u8 y = yOffset + piece.y + tileCoordinates[piece.shape][i][1];
-        if (y >= HIDDEN_ROWS)
+        if (y >= HIDDEN_ROWS) {
             drawTile(color, x + 1, y + 1 - HIDDEN_ROWS);
+        }
     }
 }
 
@@ -174,7 +178,8 @@ void drawGhost(Board board, Piece piece) {
     for (u8 i = 0; i < 4; i++) {
         u8 x = piece.x + tileCoordinates[piece.shape][i][0];
         u8 y = piece.y + tileCoordinates[piece.shape][i][1];
-        if (y >= HIDDEN_ROWS)
+        if (y >= HIDDEN_ROWS) {
             drawTile(1, x + 1, y + 1 - HIDDEN_ROWS);
+        }
     }
 }

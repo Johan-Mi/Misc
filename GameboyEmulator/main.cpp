@@ -76,8 +76,9 @@ struct GPU {
     void write_vram(u16 const index, u8 const value) {
         vram[index] = value;
 
-        if (index >= 0x1800)
+        if (index >= 0x1800) {
             return;
+        }
 
         u16 normalized_index = index & 0xFFFE;
 
@@ -191,8 +192,9 @@ struct CPU {
     void run_frame() {
         int current_cycles = 0;
         while (current_cycles < 69905) {
-            if (!cycles)
+            if (!cycles) {
                 execute(bus.read_byte(pc));
+            }
             current_cycles++;
             cycles--;
         }
@@ -1186,10 +1188,11 @@ struct CPU {
             cycle(16);
             break;
         /* CALL NZ,a16 */ case 0xc4:
-            if (regs.f.zero)
+            if (regs.f.zero) {
                 pc += 3;
-            else
+            } else {
                 call();
+            }
             cycle();
             break;
         /* PUSH BC     */ case 0xc5:
@@ -1221,10 +1224,11 @@ struct CPU {
             break;
         /* Prefix */
         /* CALL Z,a16  */ case 0xcc:
-            if (regs.f.zero)
+            if (regs.f.zero) {
                 call();
-            else
+            } else {
                 pc += 3;
+            }
             cycle();
             break;
         /* CALL a16    */ case 0xcd:
@@ -1258,10 +1262,11 @@ struct CPU {
             pc++;
             break;
         /* CALL NC,a16 */ case 0xd4:
-            if (regs.f.carry)
+            if (regs.f.carry) {
                 pc += 3;
-            else
+            } else {
                 call();
+            }
             cycle();
             break;
         /* PUSH DE     */ case 0xd5:
@@ -1296,10 +1301,11 @@ struct CPU {
             pc++;
             break;
         /* CALL C,a16  */ case 0xdc:
-            if (regs.f.carry)
+            if (regs.f.carry) {
                 call();
-            else
+            } else {
                 pc += 3;
+            }
             cycle();
             break;
         /* Invalid     */ case 0xdd:
@@ -1649,23 +1655,28 @@ struct CPU {
     void daa() {
         u8 a = regs.a;
         if (regs.f.subtract) {
-            if (regs.f.half_carry)
+            if (regs.f.half_carry) {
                 a = (a - 0x6) & 0xff;
-            if (regs.f.carry)
+            }
+            if (regs.f.carry) {
                 a -= 0x60;
+            }
         } else {
-            if (regs.f.half_carry || (a & 0xf) > 0x9)
+            if (regs.f.half_carry || (a & 0xf) > 0x9) {
                 a += 0x6;
-            if (regs.f.carry || a > 0x9f)
+            }
+            if (regs.f.carry || a > 0x9f) {
                 a += 0x60;
+            }
         }
 
         regs.a = a & 0xff;
 
         regs.f.zero = regs.a == 0;
         regs.f.half_carry = false;
-        if (a & 0x100)
+        if (a & 0x100) {
             regs.f.carry = true;
+        }
     }
 
     void scf() {
@@ -1810,8 +1821,9 @@ int main() {
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed) {
                 window.close();
+            }
         }
 
         cpu.run_frame();

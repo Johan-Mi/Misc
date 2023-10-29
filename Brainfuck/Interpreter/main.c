@@ -67,10 +67,11 @@ int main(int argc, char *argv[]) {
             if (memory[memPos] == 0) {
                 int bracketCount = 0;
                 do {
-                    if (program[progCounter] == '[')
+                    if (program[progCounter] == '[') {
                         bracketCount++;
-                    else if (program[progCounter] == ']')
+                    } else if (program[progCounter] == ']') {
                         bracketCount--;
+                    }
                     progCounter++;
                 } while (bracketCount);
             } else {
@@ -80,10 +81,11 @@ int main(int argc, char *argv[]) {
         case ']': {
             int bracketCount = 0;
             do {
-                if (program[progCounter] == '[')
+                if (program[progCounter] == '[') {
                     bracketCount++;
-                else if (program[progCounter] == ']')
+                } else if (program[progCounter] == ']') {
                     bracketCount--;
+                }
                 progCounter--;
             } while (bracketCount);
         }

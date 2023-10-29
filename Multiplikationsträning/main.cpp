@@ -35,14 +35,16 @@ int main() {
         std::cout << '\n';
         int a = rng() % (max - min + 1) + min;
         int b = tables[rng() % tables.size()];
-        if (rng() % 2)
+        if (rng() % 2) {
             std::cout << a << " * " << b << " = ";
-        else
+        } else {
             std::cout << b << " * " << a << " = ";
+        }
 
         int guess;
-        if (!(std::cin >> guess))
+        if (!(std::cin >> guess)) {
             return 0;
+        }
         if (guess == a * b) {
             std::cout << "Rätt!\n";
             correct++;

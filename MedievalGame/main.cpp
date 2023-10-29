@@ -95,11 +95,12 @@ int main() {
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed) {
                 window.close();
-            else if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::Escape)
+            } else if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Escape) {
                     window.close();
+                }
             }
         }
 
@@ -156,8 +157,9 @@ void loadAllMaps() {
         map->width = *(unsigned *)&contents[0];
         map->height = *(unsigned *)&contents[4];
         map->allocate();
-        for (int i = 0; i < map->width * map->height; i++)
+        for (int i = 0; i < map->width * map->height; i++) {
             map->data[i] = *(unsigned *)&contents[4 * i + 8];
+        }
         std::clog << "Loaded map: " << currentName << "\nWidth: " << map->width
                   << "\nHeight: " << map->height << '\n';
     }
@@ -186,8 +188,9 @@ void limitCameraPos() {
 }
 
 void detectCollision(int x, int y) {
-    if (x < 0 || y < 0)
+    if (x < 0 || y < 0) {
         return;
+    }
     switch (tiles[map->at(x, y)].type) {
     case TileType::Normal:
         player.actionDuration = walkTime;

@@ -164,8 +164,9 @@ struct Parser {
     unsigned pos = 0;
 
     bool Parse(Expression *result) {
-        if (pos >= tokens.size())
+        if (pos >= tokens.size()) {
             return false;
+        }
 
         unsigned backup = pos;
         Expression tempExpr1, tempExpr2;
@@ -231,10 +232,11 @@ int main() {
 
     auto pushCurrent = [&]() {
         if (current.length() != 0) {
-            if (current == "lambda")
+            if (current == "lambda") {
                 parser.tokens.emplace_back(TokenType::Lambda);
-            else
+            } else {
                 parser.tokens.emplace_back(TokenType::Variable, current);
+            }
             current.clear();
         }
     };
